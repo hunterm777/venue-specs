@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Kalshi API Changelog</title>
+    <link>https://docs.kalshi.com/changelog</link>
+    <item>
+      <title>August 22, 2026</title>
+      <link>https://docs.kalshi.com/changelog</link>
+      <description>Maker fees will be enabled at 5:00 AM ET on Thursday, August 20, after the maintenance window. The maker fee uses a fee multiplier of `0.5`, rather than the standard `0.25`.</description>
+    </item>
+    <item>
+      <title>August 20, 2026</title>
+      <link>https://docs.kalshi.com/changelog</link>
+      <description>NFL combos do not charge a maker fee.</description>
+    </item>
+  </channel>
+</rss>

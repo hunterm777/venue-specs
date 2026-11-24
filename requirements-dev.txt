@@ -1,0 +1,7 @@
+-r watch/requirements.txt
+pytest==9.2.0
+ruff==0.17.6
+mypy==2.4.1
+maturin==1.16.0
+types-PyYAML==6.0.12.20261122
+types-jsonschema==4.26.0.20261006

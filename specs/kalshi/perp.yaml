@@ -1,0 +1,78 @@
+# Kalshi perpetual futures (margin markets).
+# Kalshi's help center, fee schedule and perps contract terms were not readable from here,
+# so most entries are unverified. The daily watcher tracks those pages and opens an issue when
+# they change.
+schema_version: 1
+venue: kalshi
+product: perp
+version_of_rules: 2026-11-24
+
+fees:
+  taker:
+    unverified: "Perps fee rates are on Kalshi's fee schedule and margin fee tier rates endpoint, not readable here."
+    as_of: 2026-11-24
+    sources: ["https://kalshi.com/fee-schedule"]
+  maker:
+    unverified: "Perps fee rates are on Kalshi's fee schedule, not readable here."
+    as_of: 2026-11-24
+    sources: ["https://kalshi.com/fee-schedule"]
+  liquidation_fee:
+    unverified: "Not stated on the pages read."
+    as_of: 2026-11-24
+
+price_grid:
+  tick:
+    value: per_market_tick_size
+    source: "https://docs.kalshi.com/changelog.md"
+    as_of: 2026-11-24
+    note: "September 17, 2026 entry: margin markets report tick_size; the tick is set per market."
+
+size:
+  contract_size:
+    unverified: "Contract size is in Kalshi's perps contract terms, not readable here."
+    as_of: 2026-11-24
+  minimum_notional:
+    unverified: "Not stated on the pages read."
+    as_of: 2026-11-24
+
+margin:
+  max_leverage:
+    unverified: "Leverage limits are in Kalshi's perps contract terms and help center, not readable here."
+    as_of: 2026-11-24
+  maintenance_margin:
+    unverified: "Not stated on the pages read."
+    as_of: 2026-11-24
+
+funding:
+  parameters:
+    value: per_market
+    source: "https://docs.kalshi.com/changelog.md"
+    as_of: 2026-11-24
+    note: "October 15, 2026 entry: margin markets carry funding_deadband, funding_cap, funding_limit_unit and funding_invalid_premium_handling."
+  premium_averaging:
+    value: clock_aligned_bars
+    source: "https://docs.kalshi.com/changelog.md"
+    as_of: 2026-11-24
+    effective_from: 2026-10-22
+    note: "October 22, 2026 entry: \"Funding now averages the premium over clock-aligned bars\"."
+  interval:
+    unverified: "Funding times are in Kalshi's perps help articles, not readable here."
+    as_of: 2026-11-24
+  formula:
+    unverified: "Not stated on the pages read."
+    as_of: 2026-11-24
+
+settlement:
+  reference:
+    unverified: "Index and reference price rules are in Kalshi's perps contract terms, not readable here."
+    as_of: 2026-11-24
+
+position_model:
+  margin_mode:
+    unverified: "Not stated on the pages read."
+    as_of: 2026-11-24
+
+asset_classes:
+  overrides:
+    unverified: "Crypto, single-stock and index perp differences are in Kalshi's help articles, not readable here."
+    as_of: 2026-11-24

@@ -1,0 +1,102 @@
+# Polymarket prediction markets (binaries).
+# Fees read Nov 24, 2026 from the trading fees page. Polymarket's other docs pages were not
+# readable from here, so those entries are unverified. The daily watcher tracks those pages and
+# opens an issue when they change.
+schema_version: 1
+venue: polymarket
+product: binary
+version_of_rules: 2026-11-24
+
+fees:
+  taker:
+    fee:
+      formula: "round_to(C * rate * P * (1 - P), fees.rounding.step)"
+      source: "https://docs.polymarket.com/trading/fees.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "fee = C x feeRate x p x (1 - p), C shares at price p. Select the rate with category=. The page says fees are rounded to 5 decimal places but not how ties round."
+  maker:
+    fee:
+      formula: "0"
+      source: "https://docs.polymarket.com/trading/fees.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "Makers are never charged fees. Only takers pay fees."
+  rounding:
+    step:
+      value: 0.00001
+      source: "https://docs.polymarket.com/trading/fees.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "Fees are rounded to 5 decimal places; the smallest fee charged is 0.00001 USDC."
+  categories:
+    crypto:
+      rate: {value: 0.07, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Crypto taker fee rate."}
+      maker_rebate_share: {value: 0.20, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Crypto maker rebate."}
+    sports:
+      rate: {value: 0.05, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Sports taker fee rate."}
+      maker_rebate_share: {value: 0.15, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Sports maker rebate."}
+    finance:
+      rate: {value: 0.04, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Finance taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Finance maker rebate."}
+    politics:
+      rate: {value: 0.04, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Politics taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Politics maker rebate."}
+    economics:
+      rate: {value: 0.05, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Economics taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Economics maker rebate."}
+    culture:
+      rate: {value: 0.05, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Culture taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Culture maker rebate."}
+    weather:
+      rate: {value: 0.05, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Weather taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Weather maker rebate."}
+    other_general:
+      rate: {value: 0.05, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Other / General taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Other / General maker rebate."}
+    mentions:
+      rate: {value: 0.04, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Mentions taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Mentions maker rebate."}
+    tech:
+      rate: {value: 0.04, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Tech taker fee rate."}
+      maker_rebate_share: {value: 0.25, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Tech maker rebate."}
+    geopolitics:
+      rate: {value: 0, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Geopolitics taker fee rate."}
+    combos:
+      rate: {value: 0.05, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Combos taker fee rate."}
+      maker_rebate_share: {value: 0, source: "https://docs.polymarket.com/trading/fees.md", as_of: 2026-11-24, note: "Combos maker rebate."}
+  combos_rule:
+    value: combos_rate_regardless_of_legs
+    source: "https://docs.polymarket.com/trading/fees.md"
+    as_of: 2026-11-24
+    note: "Fees on combos use the Combos rate, whatever the legs."
+
+price_grid:
+  tick_sizes:
+    unverified: "Tick size rules are on Polymarket's market details and order book pages, not readable here."
+    as_of: 2026-11-24
+    sources: ["https://docs.polymarket.com/market-data/market-details.md"]
+
+size:
+  minimum_order:
+    unverified: "Minimum order size is on Polymarket's market details page, not readable here."
+    as_of: 2026-11-24
+    sources: ["https://docs.polymarket.com/market-data/market-details.md"]
+
+margin:
+  collateral:
+    unverified: "Collateral rule is on Polymarket's positions and tokens page, not readable here."
+    as_of: 2026-11-24
+
+settlement:
+  payout:
+    unverified: "Payout per winning share is on Polymarket's positions and tokens page, not readable here."
+    as_of: 2026-11-24
+  resolution_timing:
+    unverified: "Set per market, not readable here."
+    as_of: 2026-11-24
+
+position_model:
+  model:
+    unverified: "Token model, split and merge are on Polymarket's positions and tokens page, not readable here."
+    as_of: 2026-11-24

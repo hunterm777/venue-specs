@@ -1,0 +1,80 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  specs:
+    name: Specs, watcher and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: Validate specs and history against the schema
+        run: python -m watch.validate
+      - name: JSON bundle matches the YAML
+        run: python -m watch.bundle --check
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy --strict watch crates/venue-specs-py/python/venue_specs
+      - name: Watcher tests and M3 replays
+        run: python -m pytest -q tests
+
+  rust:
+    name: Rust crate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests, including the shared fee fixtures
+        run: cargo test --workspace
+      - run: cargo doc -p venue-specs --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - name: Crate packages with its embedded data
+        run: cargo package -p venue-specs
+
+  msrv:
+    name: Rust 1.85 (minimum supported)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@1.85
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p venue-specs
+
+  python:
+    name: Python package (${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: pip install maturin==1.16.0 pytest==9.2.0
+      - name: Build the wheel
+        run: maturin build --release -m crates/venue-specs-py/Cargo.toml --out dist
+      - run: pip install dist/*.whl
+      - name: Tests, including the shared fee fixtures
+        run: python -m pytest -q crates/venue-specs-py/tests
+      - name: Docstring example
+        run: python -c "import doctest, venue_specs; r = doctest.testmod(venue_specs); assert r.failed == 0 and r.attempted > 0"

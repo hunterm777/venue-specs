@@ -1,0 +1,111 @@
+# Polymarket Perps.
+# Fees read Nov 24, 2026 from Polymarket's November 2026 fee change notice, which schedules
+# new rates for November 25, 2026; the rates in force before then are in history/.
+# Polymarket's other perps docs were not readable from here, so those entries are unverified.
+# The daily watcher tracks those pages and opens an issue when they change.
+schema_version: 1
+venue: polymarket
+product: perp
+version_of_rules: 2026-11-25
+
+fees:
+  taker:
+    fee:
+      formula: "abs(P * Q) * taker"
+      source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+      as_of: 2026-11-24
+      unit: pUSD
+      note: "Fee = abs(Price * Quantity) * Rate on fill notional. Select the rate with tier=."
+  maker:
+    fee:
+      formula: "abs(P * Q) * maker"
+      source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+      as_of: 2026-11-24
+      unit: pUSD
+      note: "Negative is a rebate."
+  basis:
+    value: fill_notional
+    source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+    as_of: 2026-11-24
+    note: "Calculated in pUSD on fill notional."
+  tier_evaluation:
+    value: 30_day_volume_reevaluated_daily_utc
+    source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+    as_of: 2026-11-24
+    note: "Tiers use 30-day volume and are re-evaluated every UTC day. Account- or market-specific overrides may apply."
+  tiers:
+    "0":
+      min_30d_volume: {value: 0, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
+      taker: {value: 0.0005, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25}
+      maker: {value: 0.0002, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25, note: "Negative is a rebate."}
+    "1":
+      min_30d_volume: {value: 1000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
+      taker: {value: 0.0004, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25}
+      maker: {value: 0.0002, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25, note: "Negative is a rebate."}
+    "2":
+      min_30d_volume: {value: 5000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
+      taker: {value: 0.00035, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}
+      maker: {value: 0.0001, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25, note: "Negative is a rebate."}
+    "3":
+      min_30d_volume: {value: 25000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
+      taker: {value: 0.0003, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}
+      maker: {value: 0.00005, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null, note: "Negative is a rebate."}
+    "4":
+      min_30d_volume: {value: 100000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
+      taker: {value: 0.00027, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}
+      maker: {value: 0.00002, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null, note: "Negative is a rebate."}
+    "5":
+      min_30d_volume: {value: 500000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
+      taker: {value: 0.00025, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25}
+      maker: {value: -0.00005, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25, note: "Negative is a rebate."}
+    "6":
+      min_30d_volume: {value: 1000000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
+      taker: {value: 0.0002, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25}
+      maker: {value: -0.0001, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25, note: "Negative is a rebate."}
+  liquidation_fee:
+    value: 0.01
+    source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+    as_of: 2026-11-24
+    effective_from: 2026-11-25
+    note: "Share of liquidated notional, charged on top of the maker or taker fee; goes to the Perps insurance fund."
+
+price_grid:
+  tick:
+    unverified: "Tick size rules are in Polymarket's perps docs and instruments endpoint, not readable here."
+    as_of: 2026-11-24
+
+size:
+  minimum:
+    unverified: "Quantity decimals and minimum notional are in Polymarket's perps docs, not readable here."
+    as_of: 2026-11-24
+
+margin:
+  max_leverage:
+    unverified: "Max leverage by market is on Polymarket's perps FAQ and margin pages, not readable here."
+    as_of: 2026-11-24
+    sources: ["https://docs.polymarket.com/perps/learn-about-trading/margin.md"]
+  maintenance_margin:
+    unverified: "Maintenance margin rule is on Polymarket's perps margin page, not readable here."
+    as_of: 2026-11-24
+    sources: ["https://docs.polymarket.com/perps/learn-about-trading/margin.md"]
+
+funding:
+  formula:
+    unverified: "Funding formula, interval, cap and asset-class scale are on Polymarket's perps funding page, not readable here."
+    as_of: 2026-11-24
+    sources: ["https://docs.polymarket.com/perps/learn-about-trading/funding.md"]
+
+settlement:
+  reference:
+    unverified: "Index and mark price rules are in Polymarket's perps docs, not readable here."
+    as_of: 2026-11-24
+
+position_model:
+  margin_mode:
+    unverified: "Not stated on the pages read."
+    as_of: 2026-11-24
+
+asset_classes:
+  overrides:
+    unverified: "Crypto and RWA differences are in Polymarket's perps FAQ and funding pages, not readable here."
+    as_of: 2026-11-24

@@ -1,0 +1,11 @@
+/target/
+/dist/
+/watch-out/
+__pycache__/
+*.pyc
+*.so
+*.pyd
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

@@ -1,0 +1,12 @@
+schema_version: 1
+venue: polymarket
+product: perp
+# Rates in force until the November 25, 2026 change, as the notice states them.
+entries:
+  - {path: fees.tiers.0.taker, valid_to: 2026-11-25, leaf: {value: 0.0004, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}}
+  - {path: fees.tiers.0.maker, valid_to: 2026-11-25, leaf: {value: 0.000125, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}}
+  - {path: fees.tiers.1.taker, valid_to: 2026-11-25, leaf: {value: 0.00037, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}}
+  - {path: fees.tiers.1.maker, valid_to: 2026-11-25, leaf: {value: 0.0001, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}}
+  - {path: fees.tiers.2.maker, valid_to: 2026-11-25, leaf: {value: 0.00008, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}}
+  - {path: fees.tiers.6.maker, valid_to: 2026-11-25, leaf: {value: -0.00005, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null, note: "Negative is a rebate."}}
+  - {path: fees.liquidation_fee, valid_to: 2026-11-25, leaf: {value: 0.005, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null}}

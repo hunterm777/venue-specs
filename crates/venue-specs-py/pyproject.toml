@@ -1,0 +1,32 @@
+[build-system]
+requires = ["maturin>=1.7,<2"]
+build-backend = "maturin"
+
+[project]
+name = "venue-specs"
+version = "2026.11.24"
+description = "Versioned, sourced trading rules (fees, ticks, margin, funding, settlement) for Kalshi, Polymarket and Hyperliquid, with an exact formula evaluator."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = []
+keywords = ["kalshi", "polymarket", "hyperliquid", "fees", "prediction-markets", "perpetuals"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Rust",
+  "Topic :: Office/Business :: Financial :: Investment",
+  "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.urls]
+Repository = "https://github.com/hunterm777/venue-specs"
+Changelog = "https://github.com/hunterm777/venue-specs/blob/main/CHANGELOG.md"
+
+[tool.maturin]
+python-source = "python"
+module-name = "venue_specs._venue_specs"
+features = ["pyo3/extension-module"]

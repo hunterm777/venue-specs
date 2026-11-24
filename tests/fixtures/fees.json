@@ -1,0 +1,312 @@
+{
+  "about": "Fee and margin cases run by the Rust and Python tests. kind=prd is a PRD acceptance case; kind=derived is computed by hand from a documented rule and documented values (the source page does not print the number); kind=published is a number the source page prints. A case with expect_error cannot run as the PRD wrote it, and records why.",
+  "cases": [
+    {
+      "name": "Kalshi binary taker, 100 at $0.50 (PRD)",
+      "kind": "prd",
+      "venue": "kalshi",
+      "product": "binary",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "100",
+        "P": "0.50"
+      },
+      "rows": [],
+      "prd_expected": "1.75",
+      "expect_error": "unverified",
+      "why": "The fee schedule that gives the taker coefficient (kalshi.com/fee-schedule) could not be read, so fees.taker.model_fee is unverified."
+    },
+    {
+      "name": "Kalshi binary maker, 100 at $0.50 (PRD)",
+      "kind": "prd",
+      "venue": "kalshi",
+      "product": "binary",
+      "path": "fees.maker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "100",
+        "P": "0.50"
+      },
+      "rows": [],
+      "prd_expected": "0.44",
+      "expect_error": "unverified",
+      "why": "Same: the maker coefficient is on the unread fee schedule."
+    },
+    {
+      "name": "Kalshi fee rounding: model fee 0.00363825 rounds up to a 0.003639 trade fee",
+      "kind": "derived",
+      "venue": "kalshi",
+      "product": "binary",
+      "path": "fees.taker.trade_fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "1",
+        "P": "0.055",
+        "model_fee": "0.00363825"
+      },
+      "rows": [],
+      "expected": "0.003639",
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md"
+    },
+    {
+      "name": "Kalshi fee rounding: 1 contract bought at $0.055, balance rounded to $0.01",
+      "kind": "derived",
+      "venue": "kalshi",
+      "product": "binary",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "1",
+        "P": "0.055",
+        "model_fee": "0.00363825"
+      },
+      "rows": [],
+      "expected": "0.005",
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md"
+    },
+    {
+      "name": "Polymarket binary, 100 at 0.50, BTC 15-min rate 0.05 (PRD)",
+      "kind": "prd",
+      "venue": "polymarket",
+      "product": "binary",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "100",
+        "P": "0.50"
+      },
+      "rows": [
+        "fees.categories.crypto_btc_15m"
+      ],
+      "prd_expected": "1.25",
+      "expect_error": "not_found",
+      "why": "The fees page has no BTC 15-minute category. Crypto is 0.07 (gives 1.75); 1.25 is what the 0.05 categories give."
+    },
+    {
+      "name": "Polymarket binary crypto, 100 at 0.50",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "binary",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "100",
+        "P": "0.50"
+      },
+      "rows": [
+        "fees.categories.crypto"
+      ],
+      "expected": "1.75",
+      "source": "https://docs.polymarket.com/trading/fees.md"
+    },
+    {
+      "name": "Polymarket binary sports, 100 at 0.50",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "binary",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "100",
+        "P": "0.50"
+      },
+      "rows": [
+        "fees.categories.sports"
+      ],
+      "expected": "1.25",
+      "source": "https://docs.polymarket.com/trading/fees.md"
+    },
+    {
+      "name": "Polymarket binary finance, 100 at 0.50",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "binary",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "100",
+        "P": "0.50"
+      },
+      "rows": [
+        "fees.categories.finance"
+      ],
+      "expected": "1.00",
+      "source": "https://docs.polymarket.com/trading/fees.md"
+    },
+    {
+      "name": "Polymarket binary maker pays nothing",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "binary",
+      "path": "fees.maker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "100",
+        "P": "0.50"
+      },
+      "rows": [
+        "fees.categories.crypto"
+      ],
+      "expected": "0",
+      "source": "https://docs.polymarket.com/trading/fees.md"
+    },
+    {
+      "name": "Polymarket binary fee rounds to 5 decimals",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "binary",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "C": "1",
+        "P": "0.123"
+      },
+      "rows": [
+        "fees.categories.crypto"
+      ],
+      "expected": "0.00755",
+      "source": "https://docs.polymarket.com/trading/fees.md"
+    },
+    {
+      "name": "Hyperliquid perp taker, $10,000 notional, base tier (PRD)",
+      "kind": "prd",
+      "venue": "hyperliquid",
+      "product": "perp",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "N": "10000"
+      },
+      "rows": [
+        "fees.tiers.0"
+      ],
+      "expected": "4.50",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+    },
+    {
+      "name": "Hyperliquid perp maker, $10,000 notional, base tier",
+      "kind": "derived",
+      "venue": "hyperliquid",
+      "product": "perp",
+      "path": "fees.maker.fee",
+      "at": "2026-11-24",
+      "inputs": {
+        "N": "10000"
+      },
+      "rows": [
+        "fees.tiers.0"
+      ],
+      "expected": "1.50",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+    },
+    {
+      "name": "Polymarket perp maintenance margin, 20x market (PRD)",
+      "kind": "prd",
+      "venue": "polymarket",
+      "product": "perp",
+      "path": "margin.maintenance_margin",
+      "at": "2026-11-24",
+      "inputs": {
+        "max_leverage": "20"
+      },
+      "rows": [],
+      "prd_expected": "0.025",
+      "expect_error": "unverified",
+      "why": "Polymarket's perps margin page could not be read, so its maintenance margin rule is unverified."
+    },
+    {
+      "name": "Hyperliquid perp maintenance margin, 20x market",
+      "kind": "derived",
+      "venue": "hyperliquid",
+      "product": "perp",
+      "path": "margin.maintenance_margin_rate",
+      "at": "2026-11-24",
+      "inputs": {
+        "max_leverage": "20"
+      },
+      "rows": [],
+      "expected": "0.025",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md"
+    },
+    {
+      "name": "Hyperliquid funding example: 1% premium gives a 0.95% funding rate",
+      "kind": "published",
+      "venue": "hyperliquid",
+      "product": "perp",
+      "path": "funding.rate_8h",
+      "at": "2026-11-24",
+      "inputs": {
+        "premium_index": "0.01"
+      },
+      "rows": [],
+      "expected": "0.0095",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    },
+    {
+      "name": "Hyperliquid funding: hourly rate is one eighth, capped at 0.5%",
+      "kind": "derived",
+      "venue": "hyperliquid",
+      "product": "perp",
+      "path": "funding.rate_hourly",
+      "at": "2026-11-24",
+      "inputs": {
+        "premium_index": "0.01"
+      },
+      "rows": [],
+      "expected": "0.0011875",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    },
+    {
+      "name": "Polymarket perp tier 0 taker before the Nov 25 change, $10,000 fill",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "perp",
+      "path": "fees.taker.fee",
+      "at": "2026-11-24T23:59:59Z",
+      "inputs": {
+        "P": "100",
+        "Q": "100"
+      },
+      "rows": [
+        "fees.tiers.0"
+      ],
+      "expected": "4.0",
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+    },
+    {
+      "name": "Polymarket perp tier 0 taker from Nov 25, $10,000 fill",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "perp",
+      "path": "fees.taker.fee",
+      "at": "2026-11-25",
+      "inputs": {
+        "P": "100",
+        "Q": "100"
+      },
+      "rows": [
+        "fees.tiers.0"
+      ],
+      "expected": "5.0",
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+    },
+    {
+      "name": "Polymarket perp sell fill: fee is on absolute notional",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "perp",
+      "path": "fees.taker.fee",
+      "at": "2026-11-25",
+      "inputs": {
+        "P": "100",
+        "Q": "-100"
+      },
+      "rows": [
+        "fees.tiers.0"
+      ],
+      "expected": "5.0",
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"
+    }
+  ]
+}

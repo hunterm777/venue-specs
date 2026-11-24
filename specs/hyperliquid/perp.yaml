@@ -1,0 +1,253 @@
+# Hyperliquid perpetuals (validator-operated and HIP-3).
+# Read Nov 24, 2026 from the Hyperliquid docs (.md pages).
+schema_version: 1
+venue: hyperliquid
+product: perp
+version_of_rules: 2026-11-24
+
+fees:
+  taker:
+    fee:
+      formula: "abs(N) * taker"
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "N = trade notional (price x size). Select the volume tier with tier=. The page gives rates as percentages of trade value and does not restate the base."
+  maker:
+    fee:
+      formula: "abs(N) * maker"
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "Negative is a rebate. Select the volume tier with tier=, or pass maker= from fees.maker_rebates."
+  tier_basis:
+    value: "14d_weighted_volume = 14d_perps_volume + 2 * 14d_spot_volume"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+    as_of: 2026-11-24
+    note: "Rolling 14-day volume, assessed at the end of each UTC day; one fee tier across perps, HIP-3 perps and spot; sub-accounts share the master account's tier; vaults are separate."
+  tiers:
+    "0":
+      min_14d_weighted_volume: {value: 0, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, unit: USD, note: "Tier applies above this 14-day weighted volume; tier 0 has no minimum."}
+      taker: {value: 0.00045, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+      maker: {value: 0.00015, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+    "1":
+      min_14d_weighted_volume: {value: 5000000, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, unit: USD, note: "Tier applies above this 14-day weighted volume; tier 0 has no minimum."}
+      taker: {value: 0.0004, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+      maker: {value: 0.00012, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+    "2":
+      min_14d_weighted_volume: {value: 25000000, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, unit: USD, note: "Tier applies above this 14-day weighted volume; tier 0 has no minimum."}
+      taker: {value: 0.00035, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+      maker: {value: 0.00008, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+    "3":
+      min_14d_weighted_volume: {value: 100000000, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, unit: USD, note: "Tier applies above this 14-day weighted volume; tier 0 has no minimum."}
+      taker: {value: 0.0003, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+      maker: {value: 0.00004, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+    "4":
+      min_14d_weighted_volume: {value: 500000000, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, unit: USD, note: "Tier applies above this 14-day weighted volume; tier 0 has no minimum."}
+      taker: {value: 0.00028, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+      maker: {value: 0, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+    "5":
+      min_14d_weighted_volume: {value: 2000000000, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, unit: USD, note: "Tier applies above this 14-day weighted volume; tier 0 has no minimum."}
+      taker: {value: 0.00026, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+      maker: {value: 0, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+    "6":
+      min_14d_weighted_volume: {value: 7000000000, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, unit: USD, note: "Tier applies above this 14-day weighted volume; tier 0 has no minimum."}
+      taker: {value: 0.00024, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+      maker: {value: 0, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24, note: "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."}
+  maker_rebates:
+    "1": {min_14d_maker_volume_share: {value: 0.005, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24}, maker: {value: -0.00001, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24}}
+    "2": {min_14d_maker_volume_share: {value: 0.015, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24}, maker: {value: -0.00002, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24}}
+    "3": {min_14d_maker_volume_share: {value: 0.03, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24}, maker: {value: -0.00003, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md", as_of: 2026-11-24}}
+  rebate_payment:
+    value: continuous_per_trade
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+    as_of: 2026-11-24
+    note: "Maker rebates are paid out continuously on each trade directly to the trading wallet."
+  liquidation_fee:
+    value: 0
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md"
+    as_of: 2026-11-24
+    note: "Unlike CEXs there is no clearance fee on liquidations."
+
+price_grid:
+  max_significant_figures:
+    value: 5
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md"
+    as_of: 2026-11-24
+    note: "Integer prices are always allowed, regardless of significant figures."
+  max_price_decimals:
+    formula: "6 - szDecimals"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md"
+    as_of: 2026-11-24
+    note: "MAX_DECIMALS is 6 for perps. szDecimals comes from each asset's meta."
+
+size:
+  decimals:
+    value: per_asset_szDecimals
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md"
+    as_of: 2026-11-24
+    note: "Sizes are rounded to the szDecimals of the asset, found in the meta response of the info endpoint."
+  max_market_order_value:
+    formula: "if(max_leverage >= 25, 30000000, if(max_leverage >= 20, 5000000, if(max_leverage >= 10, 2000000, 500000)))"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    unit: USD
+  max_limit_order_value:
+    formula: "10 * max_market_order_value"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    unit: USD
+
+margin:
+  max_leverage:
+    value: per_asset_meta
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md"
+    as_of: 2026-11-24
+    note: "Leverage can be any integer between 1 and the asset's max leverage. The liquidations page says max leverage varies from 3x to 40x."
+  initial_margin:
+    formula: "1 / leverage"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    note: "Initial margin fraction; margin to open is position_size * mark_price / leverage."
+  maintenance_margin_rate:
+    formula: "1 / (2 * max_leverage)"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md"
+    as_of: 2026-11-24
+    note: "Half the initial margin rate at the tier's max leverage; 2.5% at 20x."
+  maintenance_deduction:
+    value: "deduction(0) = 0; deduction(n) = deduction(n-1) + lower_bound(n) * (mm_rate(n) - mm_rate(n-1))"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md"
+    as_of: 2026-11-24
+    note: "maintenance_margin = notional * maintenance_margin_rate - maintenance_deduction. Margin tables with IDs below 50 have one tier with max leverage equal to the ID."
+  mainnet_tiers:
+    value:
+      - {assets: [BTC], tiers: [{lower_bound: 0, max_leverage: 40}, {lower_bound: 150000000, max_leverage: 20}]}
+      - {assets: [ETH], tiers: [{lower_bound: 0, max_leverage: 25}, {lower_bound: 100000000, max_leverage: 15}]}
+      - {assets: [SOL], tiers: [{lower_bound: 0, max_leverage: 20}, {lower_bound: 70000000, max_leverage: 10}]}
+      - {assets: [XRP], tiers: [{lower_bound: 0, max_leverage: 20}, {lower_bound: 40000000, max_leverage: 10}]}
+      - {assets: [AAVE, ADA, APT, AVAX, BCH, CRV, DOGE, ENA, FARTCOIN, HYPE, kBONK, kPEPE, LINK, LTC, NEAR, PUMP, SUI, TRUMP, UNI, WLD, ZEC], tiers: [{lower_bound: 0, max_leverage: 10}, {lower_bound: 20000000, max_leverage: 5}]}
+      - {assets: [ARB, BNB, DOT, JUP, kSHIB, MKR, ONDO, PAXG, TON, TRX, XPL], tiers: [{lower_bound: 0, max_leverage: 10}, {lower_bound: 3000000, max_leverage: 5}]}
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md"
+    as_of: 2026-11-24
+    unit: USDC
+    note: "Mainnet margin tiers by notional position value. The page gives the upper tier as '>' the bound."
+  transfer_margin_required:
+    formula: "max(initial_margin_required, 0.1 * total_position_value)"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md"
+    as_of: 2026-11-24
+    unit: USDC
+  liquidation_price:
+    formula: "price - side * margin_available / position_size / (1 - side / maintenance_leverage)"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md"
+    as_of: 2026-11-24
+    note: "side = 1 long, -1 short. margin_available = account_value - maintenance_margin_required (cross) or isolated_margin - maintenance_margin_required (isolated)."
+  backstop_threshold:
+    formula: "2 / 3"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md"
+    as_of: 2026-11-24
+    note: "Backstop liquidation when account equity drops below 2/3 of maintenance margin."
+  partial_liquidation:
+    threshold: {value: 100000, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md", as_of: 2026-11-24, unit: USDC, note: "Positions larger than this get partial market liquidation orders (10k USDC on testnet)."}
+    fraction: {value: 0.2, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md", as_of: 2026-11-24}
+    cooldown_seconds: {value: 30, source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md", as_of: 2026-11-24}
+
+funding:
+  interval_hours:
+    value: 1
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+  rate_8h:
+    formula: "premium_index + clamp(interest_rate_8h - premium_index, -premium_clamp, premium_clamp)"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+    note: "The formula gives an 8-hour rate; premium_index is the hourly average of 5-second premium samples."
+  rate_hourly:
+    formula: "clamp(rate_8h / 8, -cap_per_hour, cap_per_hour)"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+    note: "Funding is paid every hour at one eighth of the computed rate, capped at 0.5%/hour."
+  interest_rate_8h:
+    value: 0.0001
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+    note: "0.01% every 8 hours (0.00125% every hour)."
+  premium_clamp:
+    value: 0.0005
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+  cap_per_hour:
+    value: 0.005
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+    note: "The funding cap and funding interval do not depend on the asset."
+  premium:
+    formula: "(max(impact_bid_px - oracle_px, 0) - max(oracle_px - impact_ask_px, 0)) / oracle_px"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+  impact_notional:
+    value: {BTC: 20000, ETH: 20000, other: 6000}
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    unit: USDC
+  payment:
+    formula: "position_size * oracle_price * rate_hourly"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+    as_of: 2026-11-24
+    note: "Uses the spot oracle price, not the mark price. Positive rate: longs pay shorts."
+
+settlement:
+  expiry:
+    value: none
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    note: "Delivery / expiration: N/A (funding payments every hour). Position limit: N/A."
+  contract:
+    value: one_unit_of_underlying
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+  oracle:
+    value: hyperliquid_oracle_index_of_spot
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    note: "USDC collateral on USDT-denominated linear contracts, no USDC/USDT conversion (quanto). PURR-USD and HYPE-USD are USDC-denominated."
+
+position_model:
+  margin_modes:
+    value: [cross, isolated, strict_isolated]
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md"
+    as_of: 2026-11-24
+    note: "Cross is the default. Strict isolated: margin cannot be removed. HIP-3 DEXs also support no-cross mode."
+
+asset_classes:
+  validator_operated:
+    fee_scale:
+      value: 1
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+      as_of: 2026-11-24
+      note: "Validator-operated perps use the base fee tiers."
+  hip3:
+    fee_scale:
+      formula: "if(deployer_fee_scale < 1, deployer_fee_scale + 1, deployer_fee_scale * 2)"
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+      as_of: 2026-11-24
+      note: "From the page's fee formula for developers (scaleIfHip3)."
+    growth_mode_scale:
+      value: 0.1
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+      as_of: 2026-11-24
+      note: "Growth mode cuts protocol fees, rebates and volume contributions by 90%; deployer fee scale must be 0 to 10."
+    taker_fee:
+      formula: "abs(N) * taker * fee_scale * if(growth_mode, growth_mode_scale, 1)"
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "Inputs: N, deployer_fee_scale, growth_mode (1 or 0), tier=. Excludes staking, referral and aligned-quote adjustments."
+    premium:
+      formula: "0.5 * (impact_bid_px + impact_ask_px) / oracle_px - 1"
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md"
+      as_of: 2026-11-24
+    settlement:
+      value: deployer_halt_trading_at_mark
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-3-builder-deployed-perpetuals.md"
+      as_of: 2026-11-24
+      note: "The deployer may settle with haltTrading, which cancels orders and settles positions at the current mark price. Deployers set oracle prices and leverage limits."

@@ -1,0 +1,143 @@
+# Kalshi event contracts (binaries).
+# Values read Nov 24, 2026. Kalshi's fee schedule (kalshi.com/fee-schedule) and help center
+# were not readable from here, so entries that depend on them are marked unverified. The daily
+# watcher tracks those pages and opens an issue when they change.
+schema_version: 1
+venue: kalshi
+product: binary
+version_of_rules: 2026-11-24
+
+fees:
+  taker:
+    model_fee:
+      unverified: "Fee formula and coefficient are on the Kalshi fee schedule, which was not readable here. The fee rounding page's worked example (model fee $0.00363825 for 1 contract at $0.055) is consistent with 0.07 x C x P x (1 - P)."
+      as_of: 2026-11-24
+      sources: ["https://kalshi.com/fee-schedule"]
+    trade_fee:
+      formula: "ceil_to(model_fee, fees.rounding.trade_fee_step)"
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Trade fee is the model fee rounded up to six decimal places."
+    fee:
+      formula: "ceil_to(C * P + trade_fee, fees.rounding.balance_step) - C * P"
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Total fee on one buy fill of C contracts at price P: trade fee plus rounding fee, where the balance change is floored to the member's balance precision. Excludes the per-order accumulator and rebates."
+  maker:
+    model_fee:
+      unverified: "Maker fee formula and the series it applies to are on the Kalshi fee schedule, which was not readable here."
+      as_of: 2026-11-24
+      sources: ["https://kalshi.com/fee-schedule"]
+    multiplier:
+      value: 0.25
+      source: "https://docs.kalshi.com/changelog.md"
+      as_of: 2026-11-24
+      note: "August 22, 2026 entry: \"The maker fee uses a fee multiplier of `0.5`, rather than the standard `0.25`.\" The 0.5 applies to the quoter fee swap."
+    trade_fee:
+      formula: "ceil_to(model_fee, fees.rounding.trade_fee_step)"
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Trade fee is the model fee rounded up to six decimal places."
+    fee:
+      formula: "ceil_to(C * P + trade_fee, fees.rounding.balance_step) - C * P"
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Same rounding as the taker fee; the rounding rule covers every fill, maker or taker."
+  rounding:
+    trade_fee_step:
+      value: 0.000001
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Fees are six-decimal dollar amounts."
+    balance_step:
+      value: 0.01
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Non-direct member balances are aligned to $0.01. Pass balance_step=0.0001 for a direct member."
+    balance_step_direct:
+      value: 0.0001
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Direct member balances are aligned to $0.0001."
+    accumulator:
+      value: per_order
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      note: "Rounding overpayment accumulates per order across all fills, maker or taker, and is rebated in balance-precision steps."
+    net_fee_floor:
+      value: 0
+      source: "https://docs.kalshi.com/getting_started/fee_rounding.md"
+      as_of: 2026-11-24
+      unit: USD
+      note: "Net fee = trade fee + rounding fee - rebate, never below zero."
+
+price_grid:
+  price_decimals:
+    value: 4
+    source: "https://docs.kalshi.com/getting_started/fixed_point_migration"
+    as_of: 2026-11-24
+    note: "*_dollars price fields carry up to 4 decimal places."
+  source_of_truth:
+    value: market_price_ranges
+    source: "https://docs.kalshi.com/getting_started/fixed_point_migration"
+    as_of: 2026-11-24
+    note: "Each market's price_ranges is the source of truth for valid prices; price_level_structure is only a label."
+  structures:
+    value:
+      linear_cent: [{start: 0.00, end: 1.00, step: 0.01}]
+      deci_cent: [{start: 0.00, end: 1.00, step: 0.001}]
+      tapered_deci_cent:
+        - {start: 0.00, end: 0.10, step: 0.001}
+        - {start: 0.10, end: 0.90, step: 0.01}
+        - {start: 0.90, end: 1.00, step: 0.001}
+      center_deci_edge_centi_cent:
+        - {start: 0.00, end: 0.01, step: 0.0001}
+        - {start: 0.01, end: 0.99, step: 0.001}
+        - {start: 0.99, end: 1.00, step: 0.0001}
+    source: "https://docs.kalshi.com/getting_started/fixed_point_migration"
+    as_of: 2026-11-24
+    unit: USD
+    note: "Bands as described on the page; the page does not say which band owns a boundary price. Also listed there, with bands not captured here: center_whole_edge_half_cent, center_whole_edge_quint_cent, center_half_edge_half_cent, center_half_edge_quint_cent, center_half_edge_deci_cent, center_quint_edge_quint_cent, center_quint_edge_deci_cent, center_centi_edge_centi_cent."
+  series_overrides:
+    multivariate_combos:
+      value: center_deci_edge_centi_cent
+      source: "https://docs.kalshi.com/changelog.md"
+      as_of: 2026-11-24
+      effective_from: 2026-09-03
+      note: "September 3, 2026 entry: \"Multivariate (combo) markets are moving from `deci_cent`\" to center_deci_edge_centi_cent."
+
+size:
+  step:
+    value: 0.01
+    source: "https://docs.kalshi.com/getting_started/fixed_point_migration"
+    as_of: 2026-11-24
+    unit: contracts
+    note: "Minimum granularity is 0.01 contracts; inputs accept 0 to 2 decimal places."
+  minimum_order:
+    unverified: "Minimum order size is not stated on the pages read."
+    as_of: 2026-11-24
+
+margin:
+  collateral:
+    unverified: "Collateral rule for event contracts is on Kalshi's help center and rulebook, not readable here."
+    as_of: 2026-11-24
+
+settlement:
+  payout:
+    unverified: "Payout per contract is on Kalshi's help center and rulebook, not readable here."
+    as_of: 2026-11-24
+  resolution_timing:
+    unverified: "Set per series in contract terms, not readable here."
+    as_of: 2026-11-24
+
+position_model:
+  model:
+    unverified: "Netting of Yes and No positions is described on Kalshi's help center, not readable here."
+    as_of: 2026-11-24

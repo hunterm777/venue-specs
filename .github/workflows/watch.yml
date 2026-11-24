@@ -1,0 +1,115 @@
+name: watch
+
+# Daily: fetch every source in watch/sources.yaml, diff against watch/snapshots/, parse, update
+# the specs, and commit straight to main when the specs validate and every test passes. A spec
+# change is tagged with a calendar version and released. A page change with no parsed value is
+# committed as a Docs-only entry and opens an issue quoting the diff. When a check fails,
+# nothing is committed and an issue is opened with the log.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.commit.outputs.tag }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: pip install -r requirements-dev.txt
+
+      - name: Fetch, diff, parse and update
+        run: python -m watch.run --out watch-out
+
+      - name: Rebuild the JSON bundle
+        run: python -m watch.bundle
+
+      - name: Validate and test
+        id: check
+        run: |
+          set +e
+          {
+            python -m watch.validate &&
+            python -m pytest -q tests &&
+            cargo test --workspace &&
+            maturin build --release -m crates/venue-specs-py/Cargo.toml --out dist &&
+            pip install --force-reinstall dist/*.whl &&
+            python -m pytest -q crates/venue-specs-py/tests
+          } > watch-out/check.log 2>&1
+          status=$?
+          tail -n 200 watch-out/check.log
+          echo "ok=$([ $status -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit, tag and push
+        id: commit
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add specs history watch/snapshots CHANGELOG.md VERSION Cargo.lock \
+            crates/venue-specs/Cargo.toml crates/venue-specs-py/Cargo.toml crates/venue-specs-py/pyproject.toml \
+            crates/venue-specs/data/venue-specs.json
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          version=$(jq -r '.version // empty' watch-out/summary.json)
+          if [ -n "$version" ]; then
+            git commit -m "watch: specs updated, release $version"
+            git tag "v$version"
+            git push origin HEAD:main "v$version"
+            echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "watch: snapshots and docs-only entries $(jq -r .date watch-out/summary.json)"
+            git push origin HEAD:main
+          fi
+
+      - name: Open or update issues
+        if: steps.check.outputs.ok == 'true'
+        run: python -m watch.issues watch-out/summary.json
+
+      - name: Report failed checks
+        if: steps.check.outputs.ok != 'true'
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          log = pathlib.Path("watch-out/check.log").read_text(errors="replace").splitlines()[-150:]
+          body = ("The daily watcher found changes but the specs did not validate or a test failed, "
+                  "so nothing was committed.\n\n```\n" + "\n".join(log) + "\n```")
+          pathlib.Path("watch-out/failure.json").write_text(json.dumps([{"title": "Watcher checks failed", "body": body}]))
+          json.dump({"issues": []}, open("watch-out/empty.json", "w"))
+          PY
+          python -m watch.issues watch-out/empty.json watch-out/failure.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: watch-out
+          path: watch-out/
+
+  release:
+    needs: watch
+    if: needs.watch.outputs.tag != ''
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.watch.outputs.tag }}
+    secrets: inherit
+    permissions:
+      contents: write

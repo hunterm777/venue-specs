@@ -1,0 +1,169 @@
+# Every page and endpoint the daily watcher fetches. Public pages only.
+#
+# kind:   markdown | html | rss | json_post | pdf
+# parser: <venue>.<function> in watch/parsers/, or omitted for prose-only pages. A change to a
+#         page without a parser (or one whose parser reads nothing new) is logged as Docs-only
+#         and opens an issue quoting the diff, per the PRD default of no prose extraction.
+
+sources:
+  # Kalshi
+  - id: kalshi_changelog
+    title: Kalshi changelog (RSS)
+    venue: kalshi
+    products: [binary, perp]
+    url: https://docs.kalshi.com/changelog/rss.xml
+    kind: rss
+    covers: [https://docs.kalshi.com/changelog.md]
+  - id: kalshi_fee_rounding
+    title: "Kalshi: Fee rounding"
+    venue: kalshi
+    products: [binary]
+    url: https://docs.kalshi.com/getting_started/fee_rounding.md
+    kind: markdown
+  - id: kalshi_fixed_point
+    title: "Kalshi: Fixed-point representation"
+    venue: kalshi
+    products: [binary]
+    url: https://docs.kalshi.com/getting_started/fixed_point_migration
+    kind: html
+    parser: kalshi.fixed_point
+  - id: kalshi_fee_schedule
+    title: Kalshi fee schedule (PDF)
+    venue: kalshi
+    products: [binary, perp]
+    url: https://kalshi.com/docs/kalshi-fee-schedule.pdf
+    kind: pdf
+  - id: kalshi_perps_stock
+    title: "Kalshi help: Single stock perpetual futures"
+    venue: kalshi
+    products: [perp]
+    url: https://help.kalshi.com/en/articles/18183683-single-stock-perpetual-futures-on-kalshi
+    kind: html
+  - id: kalshi_perps_intro
+    title: "Kalshi help: What are perpetual futures"
+    venue: kalshi
+    products: [perp]
+    url: https://help.kalshi.com/en/articles/14679970-what-are-perpetual-futures
+    kind: html
+
+  # Polymarket
+  - id: polymarket_perps_changelog
+    title: Polymarket Perps changelog
+    venue: polymarket
+    products: [perp]
+    url: https://docs.polymarket.com/changelog/perps
+    kind: html
+  - id: polymarket_trading_fees
+    title: "Polymarket: Trading fees"
+    venue: polymarket
+    products: [binary]
+    url: https://docs.polymarket.com/trading/fees.md
+    kind: markdown
+  - id: polymarket_perps_fee_notice_2026_11
+    title: "Polymarket Perps: Fee and liquidity reward changes, November 2026"
+    venue: polymarket
+    products: [perp]
+    url: https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md
+    kind: markdown
+  - id: polymarket_perps_fees
+    title: "Polymarket Perps: Fees"
+    venue: polymarket
+    products: [perp]
+    url: https://docs.polymarket.com/perps/learn-about-trading/fees.md
+    kind: markdown
+  - id: polymarket_perps_margin
+    title: "Polymarket Perps: Margin"
+    venue: polymarket
+    products: [perp]
+    url: https://docs.polymarket.com/perps/learn-about-trading/margin.md
+    kind: markdown
+  - id: polymarket_perps_funding
+    title: "Polymarket Perps: Funding"
+    venue: polymarket
+    products: [perp]
+    url: https://docs.polymarket.com/perps/learn-about-trading/funding.md
+    kind: markdown
+  - id: polymarket_perps_liquidation
+    title: "Polymarket Perps: Liquidation mechanics"
+    venue: polymarket
+    products: [perp]
+    url: https://docs.polymarket.com/perps/learn-about-trading/liquidation-mechanics.md
+    kind: markdown
+  - id: polymarket_perps_faq
+    title: "Polymarket Perps: FAQ"
+    venue: polymarket
+    products: [perp]
+    url: https://docs.polymarket.com/perps/faq
+    kind: html
+  - id: polymarket_market_details
+    title: "Polymarket: Market details"
+    venue: polymarket
+    products: [binary]
+    url: https://docs.polymarket.com/market-data/market-details.md
+    kind: markdown
+
+  # Hyperliquid
+  - id: hyperliquid_fees
+    title: "Hyperliquid: Fees"
+    venue: hyperliquid
+    products: [perp, outcome]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md
+    kind: markdown
+    parser: hyperliquid.fees
+  - id: hyperliquid_funding
+    title: "Hyperliquid: Funding"
+    venue: hyperliquid
+    products: [perp]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md
+    kind: markdown
+    parser: hyperliquid.funding
+  - id: hyperliquid_contract_specs
+    title: "Hyperliquid: Contract specifications"
+    venue: hyperliquid
+    products: [perp]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md
+    kind: markdown
+  - id: hyperliquid_margining
+    title: "Hyperliquid: Margining"
+    venue: hyperliquid
+    products: [perp]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md
+    kind: markdown
+  - id: hyperliquid_margin_tiers
+    title: "Hyperliquid: Margin tiers"
+    venue: hyperliquid
+    products: [perp]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md
+    kind: markdown
+  - id: hyperliquid_liquidations
+    title: "Hyperliquid: Liquidations"
+    venue: hyperliquid
+    products: [perp]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md
+    kind: markdown
+  - id: hyperliquid_tick_lot
+    title: "Hyperliquid: Tick and lot size"
+    venue: hyperliquid
+    products: [perp, outcome]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md
+    kind: markdown
+  - id: hyperliquid_hip3
+    title: "Hyperliquid: HIP-3 builder-deployed perpetuals"
+    venue: hyperliquid
+    products: [perp]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-3-builder-deployed-perpetuals.md
+    kind: markdown
+  - id: hyperliquid_hip4
+    title: "Hyperliquid: HIP-4 outcome markets"
+    venue: hyperliquid
+    products: [outcome]
+    url: https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md
+    kind: markdown
+  - id: hyperliquid_perp_meta
+    title: "Hyperliquid info endpoint: perp meta"
+    venue: hyperliquid
+    products: [perp]
+    url: https://api.hyperliquid.xyz/info
+    kind: json_post
+    body: '{"type": "meta"}'
+    keep: [universe, marginTables]

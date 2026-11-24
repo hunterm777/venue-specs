@@ -1,0 +1,1624 @@
+{
+ "schema_version": 1,
+ "version": "2026.11.24",
+ "specs": [
+  {
+   "schema_version": 1,
+   "venue": "hyperliquid",
+   "product": "outcome",
+   "version_of_rules": "2026-11-24",
+   "fees": {
+    "taker": {
+     "fee": {
+      "formula": "0",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "Fees are currently zero for outcome markets for initial testing. Builder fees still apply on sell orders that carry a builder code."
+     }
+    },
+    "maker": {
+     "fee": {
+      "formula": "0",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "Fees are currently zero for outcome markets for initial testing."
+     }
+    },
+    "when_charged": {
+     "value": "closing_or_settling_only",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+     "as_of": "2026-11-24",
+     "note": "Outcome trading only charges fees when closing or settling, not when opening; only fee-paying volume counts."
+    },
+    "rebates": {
+     "value": "none",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+     "as_of": "2026-11-24",
+     "note": "Outcome trading does not support rebates; users who would get rebates pay zero fees on maker orders."
+    }
+   },
+   "price_grid": {
+    "tick": {
+     "unverified": "No tick or price precision rule for outcomes is stated on the HIP-4, asset ID or tick and lot size pages.",
+     "as_of": "2026-11-24"
+    },
+    "merged_book": {
+     "value": "yes_no_books_merged",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "note": "Buying Yes at p is equivalent to selling No at 1 - p; at the same merged price level, resting sells sort before resting dual buys."
+    }
+   },
+   "size": {
+    "decimals": {
+     "unverified": "No size decimals rule for outcomes is stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "margin": {
+    "collateral": {
+     "value": "fully_collateralized",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "note": "Outcomes are fully collateralized and involve no leverage or liquidations."
+    }
+   },
+   "settlement": {
+    "yes_payout": {
+     "formula": "settle_fraction",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "unit": "quote_token",
+     "note": "Yes converts to settleFraction quote tokens per token; 1 for binary yes, 0 for binary no."
+    },
+    "no_payout": {
+     "formula": "1 - settle_fraction",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "unit": "quote_token"
+    },
+    "recurring_binary": {
+     "value": "class:priceBinary|underlying:BTC|period:1d",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "note": "The first market is a recurring binary that settles daily at 06:00 UTC to the BTC mark price."
+    },
+    "binary_rule": {
+     "formula": "markPrice0 + (settlementTime - t0) / (t1 - t0) * (markPrice1 - markPrice0) >= targetPrice",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "note": "Settles Yes when the mark price interpolated at the settlement time is at or above the target; t0 and t1 are the mark updates just before and after."
+    },
+    "bucket_rule": {
+     "value": "three buckets: < P1, [P1, P2), >= P2; exactly one settles to 1",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "note": "class:priceBucket, using the same interpolated price."
+    },
+    "series_uniqueness": {
+     "value": "one_series_per_seriesType_underlying_period",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24"
+    }
+   },
+   "position_model": {
+    "sides": {
+     "value": "two_tokens_per_outcome",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "note": "Sides are labeled by sideSpecs in outcomeMeta, often Yes and No. Asset encoding = 10 * outcome + side."
+    },
+    "split_merge": {
+     "value": "supported",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "note": "Users may split and merge outcomes to convert between primary and dual balances."
+    },
+    "questions": {
+     "value": "negate_and_merge",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "note": "In a question exactly one outcome settles Yes; outcomes are linked by negate and merge, so No shares across a question can be redeemed before settlement."
+    },
+    "multi_outcome": {
+     "value": "not_in_initial_mainnet_release",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md",
+     "as_of": "2026-11-24",
+     "note": "Multi-outcome markets will be supported but are not part of the initial mainnet release."
+    }
+   }
+  },
+  {
+   "schema_version": 1,
+   "venue": "hyperliquid",
+   "product": "perp",
+   "version_of_rules": "2026-11-24",
+   "fees": {
+    "taker": {
+     "fee": {
+      "formula": "abs(N) * taker",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "N = trade notional (price x size). Select the volume tier with tier=. The page gives rates as percentages of trade value and does not restate the base."
+     }
+    },
+    "maker": {
+     "fee": {
+      "formula": "abs(N) * maker",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "Negative is a rebate. Select the volume tier with tier=, or pass maker= from fees.maker_rebates."
+     }
+    },
+    "tier_basis": {
+     "value": "14d_weighted_volume = 14d_perps_volume + 2 * 14d_spot_volume",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+     "as_of": "2026-11-24",
+     "note": "Rolling 14-day volume, assessed at the end of each UTC day; one fee tier across perps, HIP-3 perps and spot; sub-accounts share the master account's tier; vaults are separate."
+    },
+    "tiers": {
+     "0": {
+      "min_14d_weighted_volume": {
+       "value": 0,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "note": "Tier applies above this 14-day weighted volume; tier 0 has no minimum."
+      },
+      "taker": {
+       "value": 0.00045,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      },
+      "maker": {
+       "value": 0.00015,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      }
+     },
+     "1": {
+      "min_14d_weighted_volume": {
+       "value": 5000000,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "note": "Tier applies above this 14-day weighted volume; tier 0 has no minimum."
+      },
+      "taker": {
+       "value": 0.0004,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      },
+      "maker": {
+       "value": 0.00012,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      }
+     },
+     "2": {
+      "min_14d_weighted_volume": {
+       "value": 25000000,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "note": "Tier applies above this 14-day weighted volume; tier 0 has no minimum."
+      },
+      "taker": {
+       "value": 0.00035,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      },
+      "maker": {
+       "value": 0.00008,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      }
+     },
+     "3": {
+      "min_14d_weighted_volume": {
+       "value": 100000000,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "note": "Tier applies above this 14-day weighted volume; tier 0 has no minimum."
+      },
+      "taker": {
+       "value": 0.0003,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      },
+      "maker": {
+       "value": 0.00004,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      }
+     },
+     "4": {
+      "min_14d_weighted_volume": {
+       "value": 500000000,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "note": "Tier applies above this 14-day weighted volume; tier 0 has no minimum."
+      },
+      "taker": {
+       "value": 0.00028,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      },
+      "maker": {
+       "value": 0,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      }
+     },
+     "5": {
+      "min_14d_weighted_volume": {
+       "value": 2000000000,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "note": "Tier applies above this 14-day weighted volume; tier 0 has no minimum."
+      },
+      "taker": {
+       "value": 0.00026,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      },
+      "maker": {
+       "value": 0,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      }
+     },
+     "6": {
+      "min_14d_weighted_volume": {
+       "value": 7000000000,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "note": "Tier applies above this 14-day weighted volume; tier 0 has no minimum."
+      },
+      "taker": {
+       "value": 0.00024,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      },
+      "maker": {
+       "value": 0,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Base rate, before staking, referral, aligned-quote and HIP-3 adjustments."
+      }
+     }
+    },
+    "maker_rebates": {
+     "1": {
+      "min_14d_maker_volume_share": {
+       "value": 0.005,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24"
+      },
+      "maker": {
+       "value": -0.00001,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24"
+      }
+     },
+     "2": {
+      "min_14d_maker_volume_share": {
+       "value": 0.015,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24"
+      },
+      "maker": {
+       "value": -0.00002,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24"
+      }
+     },
+     "3": {
+      "min_14d_maker_volume_share": {
+       "value": 0.03,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24"
+      },
+      "maker": {
+       "value": -0.00003,
+       "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+       "as_of": "2026-11-24"
+      }
+     }
+    },
+    "rebate_payment": {
+     "value": "continuous_per_trade",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+     "as_of": "2026-11-24",
+     "note": "Maker rebates are paid out continuously on each trade directly to the trading wallet."
+    },
+    "liquidation_fee": {
+     "value": 0,
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md",
+     "as_of": "2026-11-24",
+     "note": "Unlike CEXs there is no clearance fee on liquidations."
+    }
+   },
+   "price_grid": {
+    "max_significant_figures": {
+     "value": 5,
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md",
+     "as_of": "2026-11-24",
+     "note": "Integer prices are always allowed, regardless of significant figures."
+    },
+    "max_price_decimals": {
+     "formula": "6 - szDecimals",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md",
+     "as_of": "2026-11-24",
+     "note": "MAX_DECIMALS is 6 for perps. szDecimals comes from each asset's meta."
+    }
+   },
+   "size": {
+    "decimals": {
+     "value": "per_asset_szDecimals",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size.md",
+     "as_of": "2026-11-24",
+     "note": "Sizes are rounded to the szDecimals of the asset, found in the meta response of the info endpoint."
+    },
+    "max_market_order_value": {
+     "formula": "if(max_leverage >= 25, 30000000, if(max_leverage >= 20, 5000000, if(max_leverage >= 10, 2000000, 500000)))",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "unit": "USD"
+    },
+    "max_limit_order_value": {
+     "formula": "10 * max_market_order_value",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "unit": "USD"
+    }
+   },
+   "margin": {
+    "max_leverage": {
+     "value": "per_asset_meta",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md",
+     "as_of": "2026-11-24",
+     "note": "Leverage can be any integer between 1 and the asset's max leverage. The liquidations page says max leverage varies from 3x to 40x."
+    },
+    "initial_margin": {
+     "formula": "1 / leverage",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "note": "Initial margin fraction; margin to open is position_size * mark_price / leverage."
+    },
+    "maintenance_margin_rate": {
+     "formula": "1 / (2 * max_leverage)",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md",
+     "as_of": "2026-11-24",
+     "note": "Half the initial margin rate at the tier's max leverage; 2.5% at 20x."
+    },
+    "maintenance_deduction": {
+     "value": "deduction(0) = 0; deduction(n) = deduction(n-1) + lower_bound(n) * (mm_rate(n) - mm_rate(n-1))",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md",
+     "as_of": "2026-11-24",
+     "note": "maintenance_margin = notional * maintenance_margin_rate - maintenance_deduction. Margin tables with IDs below 50 have one tier with max leverage equal to the ID."
+    },
+    "mainnet_tiers": {
+     "value": [
+      {
+       "assets": [
+        "BTC"
+       ],
+       "tiers": [
+        {
+         "lower_bound": 0,
+         "max_leverage": 40
+        },
+        {
+         "lower_bound": 150000000,
+         "max_leverage": 20
+        }
+       ]
+      },
+      {
+       "assets": [
+        "ETH"
+       ],
+       "tiers": [
+        {
+         "lower_bound": 0,
+         "max_leverage": 25
+        },
+        {
+         "lower_bound": 100000000,
+         "max_leverage": 15
+        }
+       ]
+      },
+      {
+       "assets": [
+        "SOL"
+       ],
+       "tiers": [
+        {
+         "lower_bound": 0,
+         "max_leverage": 20
+        },
+        {
+         "lower_bound": 70000000,
+         "max_leverage": 10
+        }
+       ]
+      },
+      {
+       "assets": [
+        "XRP"
+       ],
+       "tiers": [
+        {
+         "lower_bound": 0,
+         "max_leverage": 20
+        },
+        {
+         "lower_bound": 40000000,
+         "max_leverage": 10
+        }
+       ]
+      },
+      {
+       "assets": [
+        "AAVE",
+        "ADA",
+        "APT",
+        "AVAX",
+        "BCH",
+        "CRV",
+        "DOGE",
+        "ENA",
+        "FARTCOIN",
+        "HYPE",
+        "kBONK",
+        "kPEPE",
+        "LINK",
+        "LTC",
+        "NEAR",
+        "PUMP",
+        "SUI",
+        "TRUMP",
+        "UNI",
+        "WLD",
+        "ZEC"
+       ],
+       "tiers": [
+        {
+         "lower_bound": 0,
+         "max_leverage": 10
+        },
+        {
+         "lower_bound": 20000000,
+         "max_leverage": 5
+        }
+       ]
+      },
+      {
+       "assets": [
+        "ARB",
+        "BNB",
+        "DOT",
+        "JUP",
+        "kSHIB",
+        "MKR",
+        "ONDO",
+        "PAXG",
+        "TON",
+        "TRX",
+        "XPL"
+       ],
+       "tiers": [
+        {
+         "lower_bound": 0,
+         "max_leverage": 10
+        },
+        {
+         "lower_bound": 3000000,
+         "max_leverage": 5
+        }
+       ]
+      }
+     ],
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers.md",
+     "as_of": "2026-11-24",
+     "unit": "USDC",
+     "note": "Mainnet margin tiers by notional position value. The page gives the upper tier as '>' the bound."
+    },
+    "transfer_margin_required": {
+     "formula": "max(initial_margin_required, 0.1 * total_position_value)",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md",
+     "as_of": "2026-11-24",
+     "unit": "USDC"
+    },
+    "liquidation_price": {
+     "formula": "price - side * margin_available / position_size / (1 - side / maintenance_leverage)",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md",
+     "as_of": "2026-11-24",
+     "note": "side = 1 long, -1 short. margin_available = account_value - maintenance_margin_required (cross) or isolated_margin - maintenance_margin_required (isolated)."
+    },
+    "backstop_threshold": {
+     "formula": "2 / 3",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md",
+     "as_of": "2026-11-24",
+     "note": "Backstop liquidation when account equity drops below 2/3 of maintenance margin."
+    },
+    "partial_liquidation": {
+     "threshold": {
+      "value": 100000,
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "Positions larger than this get partial market liquidation orders (10k USDC on testnet)."
+     },
+     "fraction": {
+      "value": 0.2,
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md",
+      "as_of": "2026-11-24"
+     },
+     "cooldown_seconds": {
+      "value": 30,
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/liquidations.md",
+      "as_of": "2026-11-24"
+     }
+    }
+   },
+   "funding": {
+    "interval_hours": {
+     "value": 1,
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24"
+    },
+    "rate_8h": {
+     "formula": "premium_index + clamp(interest_rate_8h - premium_index, -premium_clamp, premium_clamp)",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24",
+     "note": "The formula gives an 8-hour rate; premium_index is the hourly average of 5-second premium samples."
+    },
+    "rate_hourly": {
+     "formula": "clamp(rate_8h / 8, -cap_per_hour, cap_per_hour)",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24",
+     "note": "Funding is paid every hour at one eighth of the computed rate, capped at 0.5%/hour."
+    },
+    "interest_rate_8h": {
+     "value": 0.0001,
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24",
+     "note": "0.01% every 8 hours (0.00125% every hour)."
+    },
+    "premium_clamp": {
+     "value": 0.0005,
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24"
+    },
+    "cap_per_hour": {
+     "value": 0.005,
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24",
+     "note": "The funding cap and funding interval do not depend on the asset."
+    },
+    "premium": {
+     "formula": "(max(impact_bid_px - oracle_px, 0) - max(oracle_px - impact_ask_px, 0)) / oracle_px",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24"
+    },
+    "impact_notional": {
+     "value": {
+      "BTC": 20000,
+      "ETH": 20000,
+      "other": 6000
+     },
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "unit": "USDC"
+    },
+    "payment": {
+     "formula": "position_size * oracle_price * rate_hourly",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+     "as_of": "2026-11-24",
+     "note": "Uses the spot oracle price, not the mark price. Positive rate: longs pay shorts."
+    }
+   },
+   "settlement": {
+    "expiry": {
+     "value": "none",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "note": "Delivery / expiration: N/A (funding payments every hour). Position limit: N/A."
+    },
+    "contract": {
+     "value": "one_unit_of_underlying",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24"
+    },
+    "oracle": {
+     "value": "hyperliquid_oracle_index_of_spot",
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md",
+     "as_of": "2026-11-24",
+     "note": "USDC collateral on USDT-denominated linear contracts, no USDC/USDT conversion (quanto). PURR-USD and HYPE-USD are USDC-denominated."
+    }
+   },
+   "position_model": {
+    "margin_modes": {
+     "value": [
+      "cross",
+      "isolated",
+      "strict_isolated"
+     ],
+     "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margining.md",
+     "as_of": "2026-11-24",
+     "note": "Cross is the default. Strict isolated: margin cannot be removed. HIP-3 DEXs also support no-cross mode."
+    }
+   },
+   "asset_classes": {
+    "validator_operated": {
+     "fee_scale": {
+      "value": 1,
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+      "as_of": "2026-11-24",
+      "note": "Validator-operated perps use the base fee tiers."
+     }
+    },
+    "hip3": {
+     "fee_scale": {
+      "formula": "if(deployer_fee_scale < 1, deployer_fee_scale + 1, deployer_fee_scale * 2)",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+      "as_of": "2026-11-24",
+      "note": "From the page's fee formula for developers (scaleIfHip3)."
+     },
+     "growth_mode_scale": {
+      "value": 0.1,
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+      "as_of": "2026-11-24",
+      "note": "Growth mode cuts protocol fees, rebates and volume contributions by 90%; deployer fee scale must be 0 to 10."
+     },
+     "taker_fee": {
+      "formula": "abs(N) * taker * fee_scale * if(growth_mode, growth_mode_scale, 1)",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "Inputs: N, deployer_fee_scale, growth_mode (1 or 0), tier=. Excludes staking, referral and aligned-quote adjustments."
+     },
+     "premium": {
+      "formula": "0.5 * (impact_bid_px + impact_ask_px) / oracle_px - 1",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/funding.md",
+      "as_of": "2026-11-24"
+     },
+     "settlement": {
+      "value": "deployer_halt_trading_at_mark",
+      "source": "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-3-builder-deployed-perpetuals.md",
+      "as_of": "2026-11-24",
+      "note": "The deployer may settle with haltTrading, which cancels orders and settles positions at the current mark price. Deployers set oracle prices and leverage limits."
+     }
+    }
+   }
+  },
+  {
+   "schema_version": 1,
+   "venue": "kalshi",
+   "product": "binary",
+   "version_of_rules": "2026-11-24",
+   "fees": {
+    "taker": {
+     "model_fee": {
+      "unverified": "Fee formula and coefficient are on the Kalshi fee schedule, which was not readable here. The fee rounding page's worked example (model fee $0.00363825 for 1 contract at $0.055) is consistent with 0.07 x C x P x (1 - P).",
+      "as_of": "2026-11-24",
+      "sources": [
+       "https://kalshi.com/fee-schedule"
+      ]
+     },
+     "trade_fee": {
+      "formula": "ceil_to(model_fee, fees.rounding.trade_fee_step)",
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Trade fee is the model fee rounded up to six decimal places."
+     },
+     "fee": {
+      "formula": "ceil_to(C * P + trade_fee, fees.rounding.balance_step) - C * P",
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Total fee on one buy fill of C contracts at price P: trade fee plus rounding fee, where the balance change is floored to the member's balance precision. Excludes the per-order accumulator and rebates."
+     }
+    },
+    "maker": {
+     "model_fee": {
+      "unverified": "Maker fee formula and the series it applies to are on the Kalshi fee schedule, which was not readable here.",
+      "as_of": "2026-11-24",
+      "sources": [
+       "https://kalshi.com/fee-schedule"
+      ]
+     },
+     "multiplier": {
+      "value": 0.25,
+      "source": "https://docs.kalshi.com/changelog.md",
+      "as_of": "2026-11-24",
+      "note": "August 22, 2026 entry: \"The maker fee uses a fee multiplier of `0.5`, rather than the standard `0.25`.\" The 0.5 applies to the quoter fee swap."
+     },
+     "trade_fee": {
+      "formula": "ceil_to(model_fee, fees.rounding.trade_fee_step)",
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Trade fee is the model fee rounded up to six decimal places."
+     },
+     "fee": {
+      "formula": "ceil_to(C * P + trade_fee, fees.rounding.balance_step) - C * P",
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Same rounding as the taker fee; the rounding rule covers every fill, maker or taker."
+     }
+    },
+    "rounding": {
+     "trade_fee_step": {
+      "value": 0.000001,
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Fees are six-decimal dollar amounts."
+     },
+     "balance_step": {
+      "value": 0.01,
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Non-direct member balances are aligned to $0.01. Pass balance_step=0.0001 for a direct member."
+     },
+     "balance_step_direct": {
+      "value": 0.0001,
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Direct member balances are aligned to $0.0001."
+     },
+     "accumulator": {
+      "value": "per_order",
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "note": "Rounding overpayment accumulates per order across all fills, maker or taker, and is rebated in balance-precision steps."
+     },
+     "net_fee_floor": {
+      "value": 0,
+      "source": "https://docs.kalshi.com/getting_started/fee_rounding.md",
+      "as_of": "2026-11-24",
+      "unit": "USD",
+      "note": "Net fee = trade fee + rounding fee - rebate, never below zero."
+     }
+    }
+   },
+   "price_grid": {
+    "price_decimals": {
+     "value": 4,
+     "source": "https://docs.kalshi.com/getting_started/fixed_point_migration",
+     "as_of": "2026-11-24",
+     "note": "*_dollars price fields carry up to 4 decimal places."
+    },
+    "source_of_truth": {
+     "value": "market_price_ranges",
+     "source": "https://docs.kalshi.com/getting_started/fixed_point_migration",
+     "as_of": "2026-11-24",
+     "note": "Each market's price_ranges is the source of truth for valid prices; price_level_structure is only a label."
+    },
+    "structures": {
+     "value": {
+      "linear_cent": [
+       {
+        "start": 0,
+        "end": 1,
+        "step": 0.01
+       }
+      ],
+      "deci_cent": [
+       {
+        "start": 0,
+        "end": 1,
+        "step": 0.001
+       }
+      ],
+      "tapered_deci_cent": [
+       {
+        "start": 0,
+        "end": 0.1,
+        "step": 0.001
+       },
+       {
+        "start": 0.1,
+        "end": 0.9,
+        "step": 0.01
+       },
+       {
+        "start": 0.9,
+        "end": 1,
+        "step": 0.001
+       }
+      ],
+      "center_deci_edge_centi_cent": [
+       {
+        "start": 0,
+        "end": 0.01,
+        "step": 0.0001
+       },
+       {
+        "start": 0.01,
+        "end": 0.99,
+        "step": 0.001
+       },
+       {
+        "start": 0.99,
+        "end": 1,
+        "step": 0.0001
+       }
+      ]
+     },
+     "source": "https://docs.kalshi.com/getting_started/fixed_point_migration",
+     "as_of": "2026-11-24",
+     "unit": "USD",
+     "note": "Bands as described on the page; the page does not say which band owns a boundary price. Also listed there, with bands not captured here: center_whole_edge_half_cent, center_whole_edge_quint_cent, center_half_edge_half_cent, center_half_edge_quint_cent, center_half_edge_deci_cent, center_quint_edge_quint_cent, center_quint_edge_deci_cent, center_centi_edge_centi_cent."
+    },
+    "series_overrides": {
+     "multivariate_combos": {
+      "value": "center_deci_edge_centi_cent",
+      "source": "https://docs.kalshi.com/changelog.md",
+      "as_of": "2026-11-24",
+      "effective_from": "2026-09-03",
+      "note": "September 3, 2026 entry: \"Multivariate (combo) markets are moving from `deci_cent`\" to center_deci_edge_centi_cent."
+     }
+    }
+   },
+   "size": {
+    "step": {
+     "value": 0.01,
+     "source": "https://docs.kalshi.com/getting_started/fixed_point_migration",
+     "as_of": "2026-11-24",
+     "unit": "contracts",
+     "note": "Minimum granularity is 0.01 contracts; inputs accept 0 to 2 decimal places."
+    },
+    "minimum_order": {
+     "unverified": "Minimum order size is not stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "margin": {
+    "collateral": {
+     "unverified": "Collateral rule for event contracts is on Kalshi's help center and rulebook, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "settlement": {
+    "payout": {
+     "unverified": "Payout per contract is on Kalshi's help center and rulebook, not readable here.",
+     "as_of": "2026-11-24"
+    },
+    "resolution_timing": {
+     "unverified": "Set per series in contract terms, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "position_model": {
+    "model": {
+     "unverified": "Netting of Yes and No positions is described on Kalshi's help center, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   }
+  },
+  {
+   "schema_version": 1,
+   "venue": "kalshi",
+   "product": "perp",
+   "version_of_rules": "2026-11-24",
+   "fees": {
+    "taker": {
+     "unverified": "Perps fee rates are on Kalshi's fee schedule and margin fee tier rates endpoint, not readable here.",
+     "as_of": "2026-11-24",
+     "sources": [
+      "https://kalshi.com/fee-schedule"
+     ]
+    },
+    "maker": {
+     "unverified": "Perps fee rates are on Kalshi's fee schedule, not readable here.",
+     "as_of": "2026-11-24",
+     "sources": [
+      "https://kalshi.com/fee-schedule"
+     ]
+    },
+    "liquidation_fee": {
+     "unverified": "Not stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "price_grid": {
+    "tick": {
+     "value": "per_market_tick_size",
+     "source": "https://docs.kalshi.com/changelog.md",
+     "as_of": "2026-11-24",
+     "note": "September 17, 2026 entry: margin markets report tick_size; the tick is set per market."
+    }
+   },
+   "size": {
+    "contract_size": {
+     "unverified": "Contract size is in Kalshi's perps contract terms, not readable here.",
+     "as_of": "2026-11-24"
+    },
+    "minimum_notional": {
+     "unverified": "Not stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "margin": {
+    "max_leverage": {
+     "unverified": "Leverage limits are in Kalshi's perps contract terms and help center, not readable here.",
+     "as_of": "2026-11-24"
+    },
+    "maintenance_margin": {
+     "unverified": "Not stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "funding": {
+    "parameters": {
+     "value": "per_market",
+     "source": "https://docs.kalshi.com/changelog.md",
+     "as_of": "2026-11-24",
+     "note": "October 15, 2026 entry: margin markets carry funding_deadband, funding_cap, funding_limit_unit and funding_invalid_premium_handling."
+    },
+    "premium_averaging": {
+     "value": "clock_aligned_bars",
+     "source": "https://docs.kalshi.com/changelog.md",
+     "as_of": "2026-11-24",
+     "effective_from": "2026-10-22",
+     "note": "October 22, 2026 entry: \"Funding now averages the premium over clock-aligned bars\"."
+    },
+    "interval": {
+     "unverified": "Funding times are in Kalshi's perps help articles, not readable here.",
+     "as_of": "2026-11-24"
+    },
+    "formula": {
+     "unverified": "Not stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "settlement": {
+    "reference": {
+     "unverified": "Index and reference price rules are in Kalshi's perps contract terms, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "position_model": {
+    "margin_mode": {
+     "unverified": "Not stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "asset_classes": {
+    "overrides": {
+     "unverified": "Crypto, single-stock and index perp differences are in Kalshi's help articles, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   }
+  },
+  {
+   "schema_version": 1,
+   "venue": "polymarket",
+   "product": "binary",
+   "version_of_rules": "2026-11-24",
+   "fees": {
+    "taker": {
+     "fee": {
+      "formula": "round_to(C * rate * P * (1 - P), fees.rounding.step)",
+      "source": "https://docs.polymarket.com/trading/fees.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "fee = C x feeRate x p x (1 - p), C shares at price p. Select the rate with category=. The page says fees are rounded to 5 decimal places but not how ties round."
+     }
+    },
+    "maker": {
+     "fee": {
+      "formula": "0",
+      "source": "https://docs.polymarket.com/trading/fees.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "Makers are never charged fees. Only takers pay fees."
+     }
+    },
+    "rounding": {
+     "step": {
+      "value": 0.00001,
+      "source": "https://docs.polymarket.com/trading/fees.md",
+      "as_of": "2026-11-24",
+      "unit": "USDC",
+      "note": "Fees are rounded to 5 decimal places; the smallest fee charged is 0.00001 USDC."
+     }
+    },
+    "categories": {
+     "crypto": {
+      "rate": {
+       "value": 0.07,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Crypto taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.2,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Crypto maker rebate."
+      }
+     },
+     "sports": {
+      "rate": {
+       "value": 0.05,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Sports taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.15,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Sports maker rebate."
+      }
+     },
+     "finance": {
+      "rate": {
+       "value": 0.04,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Finance taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Finance maker rebate."
+      }
+     },
+     "politics": {
+      "rate": {
+       "value": 0.04,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Politics taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Politics maker rebate."
+      }
+     },
+     "economics": {
+      "rate": {
+       "value": 0.05,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Economics taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Economics maker rebate."
+      }
+     },
+     "culture": {
+      "rate": {
+       "value": 0.05,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Culture taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Culture maker rebate."
+      }
+     },
+     "weather": {
+      "rate": {
+       "value": 0.05,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Weather taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Weather maker rebate."
+      }
+     },
+     "other_general": {
+      "rate": {
+       "value": 0.05,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Other / General taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Other / General maker rebate."
+      }
+     },
+     "mentions": {
+      "rate": {
+       "value": 0.04,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Mentions taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Mentions maker rebate."
+      }
+     },
+     "tech": {
+      "rate": {
+       "value": 0.04,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Tech taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0.25,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Tech maker rebate."
+      }
+     },
+     "geopolitics": {
+      "rate": {
+       "value": 0,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Geopolitics taker fee rate."
+      }
+     },
+     "combos": {
+      "rate": {
+       "value": 0.05,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Combos taker fee rate."
+      },
+      "maker_rebate_share": {
+       "value": 0,
+       "source": "https://docs.polymarket.com/trading/fees.md",
+       "as_of": "2026-11-24",
+       "note": "Combos maker rebate."
+      }
+     }
+    },
+    "combos_rule": {
+     "value": "combos_rate_regardless_of_legs",
+     "source": "https://docs.polymarket.com/trading/fees.md",
+     "as_of": "2026-11-24",
+     "note": "Fees on combos use the Combos rate, whatever the legs."
+    }
+   },
+   "price_grid": {
+    "tick_sizes": {
+     "unverified": "Tick size rules are on Polymarket's market details and order book pages, not readable here.",
+     "as_of": "2026-11-24",
+     "sources": [
+      "https://docs.polymarket.com/market-data/market-details.md"
+     ]
+    }
+   },
+   "size": {
+    "minimum_order": {
+     "unverified": "Minimum order size is on Polymarket's market details page, not readable here.",
+     "as_of": "2026-11-24",
+     "sources": [
+      "https://docs.polymarket.com/market-data/market-details.md"
+     ]
+    }
+   },
+   "margin": {
+    "collateral": {
+     "unverified": "Collateral rule is on Polymarket's positions and tokens page, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "settlement": {
+    "payout": {
+     "unverified": "Payout per winning share is on Polymarket's positions and tokens page, not readable here.",
+     "as_of": "2026-11-24"
+    },
+    "resolution_timing": {
+     "unverified": "Set per market, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "position_model": {
+    "model": {
+     "unverified": "Token model, split and merge are on Polymarket's positions and tokens page, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   }
+  },
+  {
+   "schema_version": 1,
+   "venue": "polymarket",
+   "product": "perp",
+   "version_of_rules": "2026-11-25",
+   "fees": {
+    "taker": {
+     "fee": {
+      "formula": "abs(P * Q) * taker",
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "unit": "pUSD",
+      "note": "Fee = abs(Price * Quantity) * Rate on fill notional. Select the rate with tier=."
+     }
+    },
+    "maker": {
+     "fee": {
+      "formula": "abs(P * Q) * maker",
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "unit": "pUSD",
+      "note": "Negative is a rebate."
+     }
+    },
+    "basis": {
+     "value": "fill_notional",
+     "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+     "as_of": "2026-11-24",
+     "note": "Calculated in pUSD on fill notional."
+    },
+    "tier_evaluation": {
+     "value": "30_day_volume_reevaluated_daily_utc",
+     "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+     "as_of": "2026-11-24",
+     "note": "Tiers use 30-day volume and are re-evaluated every UTC day. Account- or market-specific overrides may apply."
+    },
+    "tiers": {
+     "0": {
+      "min_30d_volume": {
+       "value": 0,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "effective_from": null
+      },
+      "taker": {
+       "value": 0.0005,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25"
+      },
+      "maker": {
+       "value": 0.0002,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25",
+       "note": "Negative is a rebate."
+      }
+     },
+     "1": {
+      "min_30d_volume": {
+       "value": 1000000,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "effective_from": null
+      },
+      "taker": {
+       "value": 0.0004,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25"
+      },
+      "maker": {
+       "value": 0.0002,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25",
+       "note": "Negative is a rebate."
+      }
+     },
+     "2": {
+      "min_30d_volume": {
+       "value": 5000000,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "effective_from": null
+      },
+      "taker": {
+       "value": 0.00035,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": null
+      },
+      "maker": {
+       "value": 0.0001,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25",
+       "note": "Negative is a rebate."
+      }
+     },
+     "3": {
+      "min_30d_volume": {
+       "value": 25000000,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "effective_from": null
+      },
+      "taker": {
+       "value": 0.0003,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": null
+      },
+      "maker": {
+       "value": 0.00005,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": null,
+       "note": "Negative is a rebate."
+      }
+     },
+     "4": {
+      "min_30d_volume": {
+       "value": 100000000,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "effective_from": null
+      },
+      "taker": {
+       "value": 0.00027,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": null
+      },
+      "maker": {
+       "value": 0.00002,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": null,
+       "note": "Negative is a rebate."
+      }
+     },
+     "5": {
+      "min_30d_volume": {
+       "value": 500000000,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "effective_from": null
+      },
+      "taker": {
+       "value": 0.00025,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25"
+      },
+      "maker": {
+       "value": -0.00005,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25",
+       "note": "Negative is a rebate."
+      }
+     },
+     "6": {
+      "min_30d_volume": {
+       "value": 1000000000,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "unit": "USD",
+       "effective_from": null
+      },
+      "taker": {
+       "value": 0.0002,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25"
+      },
+      "maker": {
+       "value": -0.0001,
+       "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-25",
+       "note": "Negative is a rebate."
+      }
+     }
+    },
+    "liquidation_fee": {
+     "value": 0.01,
+     "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+     "as_of": "2026-11-24",
+     "effective_from": "2026-11-25",
+     "note": "Share of liquidated notional, charged on top of the maker or taker fee; goes to the Perps insurance fund."
+    }
+   },
+   "price_grid": {
+    "tick": {
+     "unverified": "Tick size rules are in Polymarket's perps docs and instruments endpoint, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "size": {
+    "minimum": {
+     "unverified": "Quantity decimals and minimum notional are in Polymarket's perps docs, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "margin": {
+    "max_leverage": {
+     "unverified": "Max leverage by market is on Polymarket's perps FAQ and margin pages, not readable here.",
+     "as_of": "2026-11-24",
+     "sources": [
+      "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
+     ]
+    },
+    "maintenance_margin": {
+     "unverified": "Maintenance margin rule is on Polymarket's perps margin page, not readable here.",
+     "as_of": "2026-11-24",
+     "sources": [
+      "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
+     ]
+    }
+   },
+   "funding": {
+    "formula": {
+     "unverified": "Funding formula, interval, cap and asset-class scale are on Polymarket's perps funding page, not readable here.",
+     "as_of": "2026-11-24",
+     "sources": [
+      "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+     ]
+    }
+   },
+   "settlement": {
+    "reference": {
+     "unverified": "Index and mark price rules are in Polymarket's perps docs, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "position_model": {
+    "margin_mode": {
+     "unverified": "Not stated on the pages read.",
+     "as_of": "2026-11-24"
+    }
+   },
+   "asset_classes": {
+    "overrides": {
+     "unverified": "Crypto and RWA differences are in Polymarket's perps FAQ and funding pages, not readable here.",
+     "as_of": "2026-11-24"
+    }
+   }
+  }
+ ],
+ "history": [
+  {
+   "schema_version": 1,
+   "venue": "kalshi",
+   "product": "binary",
+   "entries": [
+    {
+     "path": "price_grid.series_overrides.multivariate_combos",
+     "leaf": {
+      "value": "deci_cent",
+      "source": "https://docs.kalshi.com/changelog.md",
+      "as_of": "2026-11-24",
+      "effective_from": null,
+      "note": "September 3, 2026 entry says combo markets are moving from deci_cent."
+     },
+     "valid_to": "2026-09-03"
+    }
+   ]
+  },
+  {
+   "schema_version": 1,
+   "venue": "polymarket",
+   "product": "perp",
+   "entries": [
+    {
+     "path": "fees.tiers.0.taker",
+     "valid_to": "2026-11-25",
+     "leaf": {
+      "value": 0.0004,
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "effective_from": null
+     }
+    },
+    {
+     "path": "fees.tiers.0.maker",
+     "valid_to": "2026-11-25",
+     "leaf": {
+      "value": 0.000125,
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "effective_from": null
+     }
+    },
+    {
+     "path": "fees.tiers.1.taker",
+     "valid_to": "2026-11-25",
+     "leaf": {
+      "value": 0.00037,
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "effective_from": null
+     }
+    },
+    {
+     "path": "fees.tiers.1.maker",
+     "valid_to": "2026-11-25",
+     "leaf": {
+      "value": 0.0001,
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "effective_from": null
+     }
+    },
+    {
+     "path": "fees.tiers.2.maker",
+     "valid_to": "2026-11-25",
+     "leaf": {
+      "value": 0.00008,
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "effective_from": null
+     }
+    },
+    {
+     "path": "fees.tiers.6.maker",
+     "valid_to": "2026-11-25",
+     "leaf": {
+      "value": -0.00005,
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "effective_from": null,
+      "note": "Negative is a rebate."
+     }
+    },
+    {
+     "path": "fees.liquidation_fee",
+     "valid_to": "2026-11-25",
+     "leaf": {
+      "value": 0.005,
+      "source": "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md",
+      "as_of": "2026-11-24",
+      "effective_from": null
+     }
+    }
+   ]
+  }
+ ]
+}

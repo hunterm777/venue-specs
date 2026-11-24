@@ -1,0 +1,12 @@
+schema_version: 1
+venue: kalshi
+product: binary
+entries:
+  - path: price_grid.series_overrides.multivariate_combos
+    leaf:
+      value: deci_cent
+      source: "https://docs.kalshi.com/changelog.md"
+      as_of: 2026-11-24
+      effective_from:
+      note: "September 3, 2026 entry says combo markets are moving from deci_cent."
+    valid_to: 2026-09-03

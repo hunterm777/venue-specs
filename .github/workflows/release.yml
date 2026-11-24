@@ -1,0 +1,115 @@
+name: release
+
+# Runs only for a version tag (vYYYY.MM.DD or vYYYY.MM.DD.N): pushed by hand, or by the daily
+# watcher through workflow_call (tags pushed by the workflow token do not trigger workflows).
+# The watcher runs every check before it tags; push a tag by hand only on a commit CI passed.
+# Always: a GitHub release with venue-specs.json, the wheels and the crate archive attached.
+# crates.io and PyPI publish only when the repo has the CARGO_REGISTRY_TOKEN and PYPI_API_TOKEN
+# secrets; without them those steps say so and do nothing.
+
+on:
+  push:
+    tags: ["v20*"]
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - id: tag
+        run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+      - name: Tag matches VERSION
+        run: test "v$(cat VERSION)" = "${{ steps.tag.outputs.tag }}"
+
+  wheels:
+    needs: check
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.check.outputs.tag }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release -m crates/venue-specs-py/Cargo.toml --out dist
+          manylinux: auto
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: dist/
+
+  sdist-and-crate:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.check.outputs.tag }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: -m crates/venue-specs-py/Cargo.toml --out dist
+      - run: cargo package -p venue-specs && cp target/package/venue-specs-*.crate dist/
+      - run: cp crates/venue-specs/data/venue-specs.json dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist-and-crate
+          path: dist/
+
+  publish:
+    needs: [check, wheels, sdist-and-crate]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ needs.check.outputs.tag }}
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.check.outputs.tag }}
+      - uses: actions/download-artifact@v5
+        with:
+          path: dist
+          merge-multiple: true
+      - name: GitHub release
+        run: |
+          day=$(echo "${TAG#v}" | cut -d. -f1-3 | tr . -)
+          awk -v d="## $day" '$0==d{f=1;next} /^## /{f=0} f' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Data release ${TAG#v}." > notes.md
+          gh release create "$TAG" dist/* --title "$TAG" --notes-file notes.md --verify-tag
+      - uses: dtolnay/rust-toolchain@stable
+      - name: crates.io
+        run: |
+          if [ -z "$CARGO_REGISTRY_TOKEN" ]; then
+            echo "CARGO_REGISTRY_TOKEN is not set; not publishing the crate."
+          else
+            cargo publish -p venue-specs
+          fi
+      - name: PyPI
+        run: |
+          if [ -z "$PYPI_API_TOKEN" ]; then
+            echo "PYPI_API_TOKEN is not set; not publishing to PyPI."
+          else
+            pip install maturin==1.16.0
+            MATURIN_PYPI_TOKEN="$PYPI_API_TOKEN" maturin upload --non-interactive dist/*.whl dist/*.tar.gz
+          fi

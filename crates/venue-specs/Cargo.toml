@@ -1,0 +1,18 @@
+[package]
+name = "venue-specs"
+# Calendar version YYYY.MM.DD written as YYYY.(MM*100+DD).N, because crates.io needs
+# three-part semver. 2026.1124.0 is the 2026.11.24 release.
+version = "2026.1124.0"
+description = "Versioned, sourced trading rules (fees, ticks, margin, funding, settlement) for Kalshi, Polymarket and Hyperliquid, with an exact formula evaluator."
+readme = "README.md"
+keywords = ["kalshi", "polymarket", "hyperliquid", "fees", "prediction-markets"]
+categories = ["finance"]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+include = ["src/**", "data/venue-specs.json", "README.md", "LICENSE"]
+
+[dependencies]
+serde_json = { version = "1.0", features = ["arbitrary_precision", "preserve_order"] }
+rust_decimal = { version = "1.36", default-features = false, features = ["std"] }

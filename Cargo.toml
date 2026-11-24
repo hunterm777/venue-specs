@@ -1,0 +1,13 @@
+[workspace]
+members = ["crates/venue-specs", "crates/venue-specs-py"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/hunterm777/venue-specs"
+rust-version = "1.85"
+
+[profile.release]
+lto = true
+codegen-units = 1

@@ -1,0 +1,108 @@
+# Hyperliquid outcome markets (HIP-4).
+# Read Nov 24, 2026 from the Hyperliquid docs (.md pages).
+schema_version: 1
+venue: hyperliquid
+product: outcome
+version_of_rules: 2026-11-24
+
+fees:
+  taker:
+    fee:
+      formula: "0"
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "Fees are currently zero for outcome markets for initial testing. Builder fees still apply on sell orders that carry a builder code."
+  maker:
+    fee:
+      formula: "0"
+      source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+      as_of: 2026-11-24
+      unit: USDC
+      note: "Fees are currently zero for outcome markets for initial testing."
+  when_charged:
+    value: closing_or_settling_only
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+    as_of: 2026-11-24
+    note: "Outcome trading only charges fees when closing or settling, not when opening; only fee-paying volume counts."
+  rebates:
+    value: none
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees.md"
+    as_of: 2026-11-24
+    note: "Outcome trading does not support rebates; users who would get rebates pay zero fees on maker orders."
+
+price_grid:
+  tick:
+    unverified: "No tick or price precision rule for outcomes is stated on the HIP-4, asset ID or tick and lot size pages."
+    as_of: 2026-11-24
+  merged_book:
+    value: yes_no_books_merged
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    note: "Buying Yes at p is equivalent to selling No at 1 - p; at the same merged price level, resting sells sort before resting dual buys."
+
+size:
+  decimals:
+    unverified: "No size decimals rule for outcomes is stated on the pages read."
+    as_of: 2026-11-24
+
+margin:
+  collateral:
+    value: fully_collateralized
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    note: "Outcomes are fully collateralized and involve no leverage or liquidations."
+
+settlement:
+  yes_payout:
+    formula: "settle_fraction"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    unit: quote_token
+    note: "Yes converts to settleFraction quote tokens per token; 1 for binary yes, 0 for binary no."
+  no_payout:
+    formula: "1 - settle_fraction"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    unit: quote_token
+  recurring_binary:
+    value: "class:priceBinary|underlying:BTC|period:1d"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    note: "The first market is a recurring binary that settles daily at 06:00 UTC to the BTC mark price."
+  binary_rule:
+    formula: "markPrice0 + (settlementTime - t0) / (t1 - t0) * (markPrice1 - markPrice0) >= targetPrice"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    note: "Settles Yes when the mark price interpolated at the settlement time is at or above the target; t0 and t1 are the mark updates just before and after."
+  bucket_rule:
+    value: "three buckets: < P1, [P1, P2), >= P2; exactly one settles to 1"
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+    note: "class:priceBucket, using the same interpolated price."
+  series_uniqueness:
+    value: one_series_per_seriesType_underlying_period
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/contract-specifications.md"
+    as_of: 2026-11-24
+
+position_model:
+  sides:
+    value: two_tokens_per_outcome
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    note: "Sides are labeled by sideSpecs in outcomeMeta, often Yes and No. Asset encoding = 10 * outcome + side."
+  split_merge:
+    value: supported
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    note: "Users may split and merge outcomes to convert between primary and dual balances."
+  questions:
+    value: negate_and_merge
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    note: "In a question exactly one outcome settles Yes; outcomes are linked by negate and merge, so No shares across a question can be redeemed before settlement."
+  multi_outcome:
+    value: not_in_initial_mainnet_release
+    source: "https://hyperliquid.gitbook.io/hyperliquid-docs/hyperliquid-improvement-proposals-hips/hip-4-outcome-markets.md"
+    as_of: 2026-11-24
+    note: "Multi-outcome markets will be supported but are not part of the initial mainnet release."
