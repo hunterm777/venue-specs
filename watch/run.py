@@ -28,7 +28,7 @@ from .diff import excerpt, unified
 from .fetch import FetchError, fetch
 from .model import Change, Issue, ParseResult, Proposal, Source
 from .specio import ROOT
-from .update import apply_all
+from .update import Conflict, apply_all
 from .version import bump
 
 SOURCES = ROOT / "watch" / "sources.yaml"
@@ -131,7 +131,16 @@ def run(
         else:
             docs.append((src, unified(old, text, src.id), result.problems))
 
-    changes, written = apply_all(proposals, today, root)
+    conflicts: list[Conflict] = []
+    changes, written = apply_all(proposals, today, root, conflicts)
+    for conflict in conflicts:
+        for i, (src, diff, problems) in enumerate(docs):
+            if src.url == conflict.source:
+                docs[i] = (src, diff, [*problems, str(conflict)])
+                break
+        else:
+            src = next(s for s in sources if s.url == conflict.source)
+            docs.append((src, "", [str(conflict)]))
     touched = {(c.venue, c.product, c.source) for c in changes}
 
     issues: list[Issue] = []

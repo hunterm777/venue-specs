@@ -1,0 +1,18 @@
+Funding
+How Funding Works
+Funding is computed in three stages:
+A premium index is sampled from the order book every 5 seconds.
+Samples are averaged over the 1-hour charge window to produce an hourly rate.
+The rate is settled against every open position at the end of the window.
+Premium Index
+bid_impact = VWAP of top bids filling 1,000 quote notional
+ask_impact = VWAP of top asks filling 1,000 quote notional
+IPD = max(bid_impact - Index, 0) - max(Index - ask_impact, 0)
+PremiumIndex = IPD / Index
+Funding Rate
+mean_P = average of PremiumIndex samples over the window
+scale = 1.0 for crypto markets; 0.5 otherwise
+F_8h = scale * (mean_P + clamp(0.0001 - mean_P, +/-0.0005))
+FR_hour = clamp(F_8h / 8, +/-0.04)
+Interval
+The charge window is 1 hour. Samples are averaged over the hour, and the hourly rate is applied once at the end.

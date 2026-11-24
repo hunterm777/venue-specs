@@ -1,8 +1,9 @@
 # Polymarket Perps.
 # Fees read Nov 24, 2026 from Polymarket's November 2026 fee change notice, which schedules
-# new rates for November 25, 2026; the rates in force before then are in history/.
-# Per-market tick and size steps for ANT, INTC and SNDK are read from the Perps changelog.
-# Polymarket's other perps docs were not readable from here, so those entries are unverified.
+# new rates for November 25, 2026; the rates in force before then are in history/ and match the
+# Perps fees page. Funding and margin rules are read from the Perps funding and margin pages, and
+# per-market tick and size steps for ANT, INTC and SNDK from the Perps changelog. Polymarket's
+# other perps docs were not readable from here, so those entries are unverified.
 # The weekly watcher tracks those pages and opens an issue when they change.
 schema_version: 1
 venue: polymarket
@@ -57,11 +58,11 @@ fees:
       maker: {value: 0.00002, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null, note: "Negative is a rebate."}
     "5":
       min_30d_volume: {value: 500000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
-      taker: {value: 0.00025, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25}
+      taker: {value: 0.00025, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null, note: "The fees page gives the same rate before the Nov 25, 2026 change."}
       maker: {value: -0.00005, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25, note: "Negative is a rebate."}
     "6":
       min_30d_volume: {value: 1000000000, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, unit: USD, effective_from: null}
-      taker: {value: 0.0002, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25}
+      taker: {value: 0.0002, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: null, note: "The fees page gives the same rate before the Nov 25, 2026 change."}
       maker: {value: -0.0001, source: "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md", as_of: 2026-11-24, effective_from: 2026-11-25, note: "Negative is a rebate."}
   liquidation_fee:
     value: 0.01
@@ -96,19 +97,73 @@ size:
 
 margin:
   max_leverage:
-    unverified: "Max leverage by market is on Polymarket's perps FAQ and margin pages, not readable here."
+    value: per_market_leverage_tiers
+    source: "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
     as_of: 2026-11-24
-    sources: ["https://docs.polymarket.com/perps/learn-about-trading/margin.md"]
+    note: "Each market has a leverage tier schedule (from Market Data); larger positions must run at lower leverage. The numbers are not on the margin page."
+  initial_margin:
+    formula: "N / leverage"
+    source: "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
+    as_of: 2026-11-24
+    unit: pUSD
+    note: "IM = Notional / Leverage, at your configured leverage, which applies to the whole notional."
+  maintenance_margin_rate:
+    formula: "0.5 / max_leverage"
+    source: "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
+    as_of: 2026-11-24
+    note: "MMR = 0.5 / MaxLeverage, flat per market, independent of position size, tier and leverage setting; 2.5% on a 20x market."
   maintenance_margin:
-    unverified: "Maintenance margin rule is on Polymarket's perps margin page, not readable here."
+    formula: "N * maintenance_margin_rate"
+    source: "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
     as_of: 2026-11-24
-    sources: ["https://docs.polymarket.com/perps/learn-about-trading/margin.md"]
+    unit: pUSD
+    note: "MM = Notional x MMR. Liquidation begins when equity falls below MM."
 
 funding:
-  formula:
-    unverified: "Funding formula, interval, cap and asset-class scale are on Polymarket's perps funding page, not readable here."
+  interval_hours:
+    value: 1
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
     as_of: 2026-11-24
-    sources: ["https://docs.polymarket.com/perps/learn-about-trading/funding.md"]
+    note: "Premium samples are averaged over the 1-hour charge window and the hourly rate is settled once at its end."
+  sample_interval_seconds:
+    value: 5
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+  impact_notional:
+    value: 1000
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+    unit: pUSD
+    note: "Quote notional each side of the book is walked for to get bid_impact and ask_impact; a side that cannot fill it falls back to Index."
+  premium:
+    formula: "(max(bid_impact - index, 0) - max(index - ask_impact, 0)) / index"
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+    note: "One 5-second premium index sample."
+  rate_8h:
+    formula: "scale * (premium_index + clamp(interest_rate_8h - premium_index, -premium_clamp, premium_clamp))"
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+    note: "premium_index is the mean of the window's samples; scale is asset_classes.crypto.funding_scale or asset_classes.other.funding_scale."
+  rate_hourly:
+    formula: "clamp(rate_8h / 8, -cap_per_hour, cap_per_hour)"
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+    note: "Positive: longs pay shorts. Funding is a direct transfer between longs and shorts; the protocol takes no cut."
+  interest_rate_8h:
+    value: 0.0001
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+    note: "Fixed interest leg of 0.01% per 8 hours."
+  premium_clamp:
+    value: 0.0005
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+  cap_per_hour:
+    value: 0.04
+    source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    as_of: 2026-11-24
+    note: "4% per hour."
 
 settlement:
   reference:
@@ -117,10 +172,16 @@ settlement:
 
 position_model:
   margin_mode:
-    unverified: "Not stated on the pages read."
+    value: [cross, isolated]
+    source: "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
     as_of: 2026-11-24
+    note: "Isolated is the default when neither you nor your account group set a mode. Switching needs no position and no open orders in that market."
 
 asset_classes:
+  crypto:
+    funding_scale: {value: 1.0, source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md", as_of: 2026-11-24}
+  other:
+    funding_scale: {value: 0.5, source: "https://docs.polymarket.com/perps/learn-about-trading/funding.md", as_of: 2026-11-24, note: "Every market that is not crypto."}
   overrides:
-    unverified: "Crypto and RWA differences are in Polymarket's perps FAQ and funding pages, not readable here."
+    unverified: "Other differences between crypto and other markets, if any, are in Polymarket's perps FAQ, not readable here."
     as_of: 2026-11-24

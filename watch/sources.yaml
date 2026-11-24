@@ -72,18 +72,21 @@ sources:
     products: [perp]
     url: https://docs.polymarket.com/perps/learn-about-trading/fees.md
     kind: markdown
+    parser: polymarket.perps_fees
   - id: polymarket_perps_margin
     title: "Polymarket Perps: Margin"
     venue: polymarket
     products: [perp]
     url: https://docs.polymarket.com/perps/learn-about-trading/margin.md
     kind: markdown
+    parser: polymarket.perps_margin
   - id: polymarket_perps_funding
     title: "Polymarket Perps: Funding"
     venue: polymarket
     products: [perp]
     url: https://docs.polymarket.com/perps/learn-about-trading/funding.md
     kind: markdown
+    parser: polymarket.perps_funding
   - id: polymarket_perps_liquidation
     title: "Polymarket Perps: Liquidation mechanics"
     venue: polymarket

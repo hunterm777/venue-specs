@@ -8,8 +8,12 @@ the 0.001 tick and size step at the same time."). An entry that mentions a tick 
 other wording is reported as a problem, so the watcher opens an issue instead of guessing.
 
 Fee and margin changes appear in the changelog as prose, so they are not read from it (the PRD's
-default, no LLM extraction); the page change opens an issue. Other Polymarket pages have no parser
-yet: their layouts have not been checked, and a parser written blind could commit a wrong number.
+default, no LLM extraction); the page change opens an issue.
+
+The Perps fees, funding and margin pages are read from their tables and formula lines. The pages
+were checked from copies of the rendered pages, so the text is read with Markdown marks and line
+breaks removed; anything a parser expects and cannot find is reported, and nothing is proposed from
+it. Other Polymarket pages have no parser yet: their layouts have not been checked.
 """
 
 from __future__ import annotations
@@ -18,6 +22,7 @@ import re
 from decimal import Decimal
 
 from ..model import ParseResult, Proposal, Source
+from .common import amount, percent
 
 _MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 _FULL = (
@@ -116,4 +121,94 @@ def perps_changelog(text: str, src: Source) -> ParseResult:
             found += 1
         if not found and _MENTIONS_TICK.search(body):
             out.problems.append(f"{heading}: mentions a tick size change in a wording this parser does not read")
+    return out
+
+
+def _plain(text: str) -> str:
+    """Page text with Markdown table pipes, emphasis, code marks and escapes removed and
+    whitespace collapsed, so a rendered copy and the fetched .md read the same."""
+    text = text.replace("\\_", "_").replace("\\*", "*").replace("±", "+/-")
+    text = re.sub(r"[|`]|\*\*", " ", text)
+    return " ".join(text.split())
+
+
+_FEE_FORMULA = re.compile(r"Fee = abs\(Price \* Quantity\) \* Rate\b")
+_FEE_HEADER = re.compile(r"30-Day Volume\s*(?:≥|>=)\s*Taker\s+Maker\b")
+_FEE_ROW = re.compile(r"\$\s*(\d[\d,.]*\s*[KMB]?)\s+(-?[\d.]+)%\s+(-?[\d.]+)%")
+FEE_TIERS = 7
+
+
+def perps_fees(text: str, src: Source) -> ParseResult:
+    """The Perps fee tier table (rates in force today) and the fee formula sentence."""
+    out = ParseResult()
+    flat = _plain(text)
+    if not _FEE_FORMULA.search(flat):
+        out.problems.append("perps fees: 'Fee = abs(Price * Quantity) * Rate' not found")
+    head = _FEE_HEADER.search(flat)
+    rows = [m.groups() for m in _FEE_ROW.finditer(flat[head.end() : head.end() + 600])] if head else []
+    if len(rows) < FEE_TIERS:
+        out.problems.append(f"perps fee tier table: expected {FEE_TIERS} rows, found {len(rows)}")
+        return out
+    for tier, (volume, taker, maker) in enumerate(rows[:FEE_TIERS]):
+        for path, value in (("min_30d_volume", amount(volume)), ("taker", percent(taker)), ("maker", percent(maker))):
+            out.proposals.append(Proposal("polymarket", "perp", f"fees.tiers.{tier}.{path}", src.url, value=value))
+    return out
+
+
+_PM = r"(?:\+/-)"
+_FUNDING = {
+    "funding.sample_interval_seconds": re.compile(r"premium index is sampled from the order book every (\d+) seconds"),
+    "funding.impact_notional": re.compile(r"bid_impact = VWAP of top bids filling ([\d,]+) quote notional"),
+    "funding.interval_hours": re.compile(r"The charge window is (\d+) hours?\b"),
+    "funding.cap_per_hour": re.compile(r"FR_hour = clamp\(F_8h / 8, " + _PM + r"([\d.]+)\)"),
+}
+_SCALE = re.compile(r"scale = ([\d.]+) for crypto markets; ([\d.]+) otherwise")
+_F8H = re.compile(r"F_8h = scale \* \(mean_P \+ clamp\(([\d.]+) - mean_P, " + _PM + r"([\d.]+)\)\)")
+
+
+def perps_funding(text: str, src: Source) -> ParseResult:
+    """Funding constants: sample interval, impact notional, charge window, interest leg,
+    clamp, hourly cap and the crypto / non-crypto scale."""
+    out = ParseResult()
+    flat = _plain(text)
+
+    def put(path: str, value: Decimal) -> None:
+        out.proposals.append(Proposal("polymarket", "perp", path, src.url, value=value))
+
+    for path, rx in _FUNDING.items():
+        if m := rx.search(flat):
+            put(path, Decimal(m.group(1).replace(",", "")))
+        else:
+            out.problems.append(f"perps funding: {path} not found ({rx.pattern})")
+    if m := _F8H.search(flat):
+        put("funding.interest_rate_8h", Decimal(m.group(1)))
+        put("funding.premium_clamp", Decimal(m.group(2)))
+    else:
+        out.problems.append("perps funding: the F_8h formula not found")
+    if m := _SCALE.search(flat):
+        put("asset_classes.crypto.funding_scale", Decimal(m.group(1)))
+        put("asset_classes.other.funding_scale", Decimal(m.group(2)))
+    else:
+        out.problems.append("perps funding: 'scale = ... for crypto markets; ... otherwise' not found")
+    return out
+
+
+_MMR = re.compile(r"MMR = ([\d.]+) / MaxLeverage\b")
+_IM = re.compile(r"IM = Notional / Leverage\b")
+
+
+def perps_margin(text: str, src: Source) -> ParseResult:
+    """The maintenance margin rate rule (MMR = k / MaxLeverage) and the initial margin rule."""
+    out = ParseResult()
+    flat = _plain(text)
+    if m := _MMR.search(flat):
+        out.proposals.append(
+            Proposal(
+                "polymarket", "perp", "margin.maintenance_margin_rate", src.url, formula=f"{m.group(1)} / max_leverage"
+            )
+        )
+    else:
+        out.problems.append("perps margin: 'MMR = ... / MaxLeverage' not found")
+    if not _IM.search(flat):
+        out.problems.append("perps margin: 'IM = Notional / Leverage' not found")
     return out

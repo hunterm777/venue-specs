@@ -12,3 +12,8 @@
   before and after its Nov 19, 2026 entry. Only the lines the parser and replay need are kept. The
   watcher fetches the page's HTML, whose text can break into lines differently, so the parser reads
   the text with its line breaks collapsed.
+- `polymarket_perps_fees.txt`, `polymarket_perps_funding.txt`, `polymarket_perps_margin.txt`:
+  excerpts of the Polymarket Perps fees, funding and margin pages, copied line for line from the
+  rendered pages as pasted on 2026-11-24. The watcher fetches the pages' Markdown, so the parsers
+  read the text with Markdown marks and line breaks removed; if the Markdown reads differently, the
+  parser reports it and an issue is opened.

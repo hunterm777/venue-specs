@@ -4,6 +4,10 @@ A value equal to the one on file changes nothing. A value for an unverified or m
 Added. A different value replaces the one on file, which moves to history/ with its validity
 ending when the new value starts: Upcoming when that is after today, Changed otherwise. When the
 source states no start date, the new value starts on the day it was first seen.
+
+A page that shows today's rules while a change is announced (an undated value for an entry whose
+value on file starts later) is checked against the value in force today, from history/. A match
+changes nothing; a mismatch is a Conflict, reported so an issue is opened and nothing is written.
 """
 
 from __future__ import annotations
@@ -22,6 +26,14 @@ from .specio import ROOT, load_yaml
 
 UNDATED = "Start date not stated by the source; effective_from is the day the change was first seen."
 LEAF_KEYS = ("value", "formula", "source", "as_of", "effective_from", "unit", "note")
+
+
+class Conflict(Exception):
+    """A page's value for today disagrees with the value on file for today."""
+
+    def __init__(self, source: str, message: str) -> None:
+        super().__init__(message)
+        self.source = source
 
 
 def _yaml() -> YAML:
@@ -56,8 +68,11 @@ def _date(text: str) -> Any:
 
 
 def _same(a: Any, b: Any) -> bool:
-    if isinstance(a, (Decimal, int)) and isinstance(b, (Decimal, int)) and not isinstance(a, bool):
-        return Decimal(a) == Decimal(b)
+    """Equal values; numbers compare exactly (a float read back by the round-trip loader is
+    compared by the digits it was written with)."""
+    num = (Decimal, int, float)
+    if isinstance(a, num) and isinstance(b, num) and not isinstance(a, bool) and not isinstance(b, bool):
+        return Decimal(str(a)) == Decimal(str(b))
     return bool(a == b)
 
 
@@ -150,6 +165,16 @@ class SpecFiles:
         old_val = cur.get("formula") if prop.formula is not None else cur.get("value")
         if _same(old_val, shown) and ("formula" in cur) == (prop.formula is not None):
             return None
+        cur_start = str(cur.get("effective_from") or "")
+        if prop.effective_from is None and cur_start and _start(cur_start) > today:
+            in_force = self._in_force_before(prop.path, cur_start)
+            if in_force is not None and _same(in_force, shown):
+                return None
+            raise Conflict(
+                prop.source,
+                f"{prop.path}: the page reads {shown} for today, but the value on file until {cur_start} is "
+                f"{in_force if in_force is not None else 'not recorded'}, and {old_val} is announced from then.",
+            )
 
         starts = prop.effective_from or today
         for k in ("unit", "note"):
@@ -160,7 +185,6 @@ class SpecFiles:
         if prop.effective_from is None:
             new["note"] = (str(new.get("note", "")).replace(UNDATED, "").strip() + " " + UNDATED).strip()
         new["effective_from"] = _date(starts)
-        cur_start = str(cur.get("effective_from") or "")
         if cur_start and _start(cur_start) > today:
             # The value on file was announced but never took effect; replace it, no history.
             self._set(prop.path, _flow(new))
@@ -179,6 +203,14 @@ class SpecFiles:
         self._bump(starts)
         kind = "Upcoming" if _start(starts) > today else "Changed"
         return change(kind, f"{prop.path} {old_val} -> {shown}", starts)
+
+    def _in_force_before(self, path: str, starts: str) -> Any:
+        """The value history records for `path` up to `starts`, or None."""
+        for e in self._history()["entries"]:
+            if e["path"] == path and str(e["valid_to"]) == starts:
+                leaf = e["leaf"]
+                return leaf.get("formula", leaf.get("value"))
+        return None
 
     def _bump(self, starts: str) -> None:
         day = _start(starts)
@@ -213,15 +245,24 @@ def normalise(root: Path = ROOT) -> list[Path]:
     return out
 
 
-def apply_all(proposals: list[Proposal], today: str, root: Path = ROOT) -> tuple[list[Change], list[Path]]:
-    """Apply proposals grouped by spec file; return changelog lines and files written."""
+def apply_all(
+    proposals: list[Proposal], today: str, root: Path = ROOT, conflicts: list[Conflict] | None = None
+) -> tuple[list[Change], list[Path]]:
+    """Apply proposals grouped by spec file; return changelog lines and files written. Conflicts
+    are appended to `conflicts` when given, and raised otherwise."""
     files: dict[tuple[str, str], SpecFiles] = {}
     changes: list[Change] = []
     for p in proposals:
         key = (p.venue, p.product)
         if key not in files:
             files[key] = SpecFiles(p.venue, p.product, root)
-        c = files[key].apply(p, today)
+        try:
+            c = files[key].apply(p, today)
+        except Conflict as e:
+            if conflicts is None:
+                raise
+            conflicts.append(e)
+            continue
         if c:
             changes.append(c)
     written = [path for f in files.values() for path in f.save()]

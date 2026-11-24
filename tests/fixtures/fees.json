@@ -205,15 +205,45 @@
       "kind": "prd",
       "venue": "polymarket",
       "product": "perp",
-      "path": "margin.maintenance_margin",
+      "path": "margin.maintenance_margin_rate",
       "at": "2026-11-24",
       "inputs": {
         "max_leverage": "20"
       },
       "rows": [],
       "prd_expected": "0.025",
-      "expect_error": "unverified",
-      "why": "Polymarket's perps margin page could not be read, so its maintenance margin rule is unverified."
+      "expected": "0.025",
+      "source": "https://docs.polymarket.com/perps/learn-about-trading/margin.md"
+    },
+    {
+      "name": "Polymarket perp hourly funding, non-crypto market, premium index 0.02%",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "perp",
+      "path": "funding.rate_hourly",
+      "at": "2026-11-24",
+      "inputs": {
+        "scale": "0.5",
+        "premium_index": "0.0002"
+      },
+      "rows": [],
+      "expected": "0.00000625",
+      "source": "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
+    },
+    {
+      "name": "Polymarket perp hourly funding hits the 4% cap",
+      "kind": "derived",
+      "venue": "polymarket",
+      "product": "perp",
+      "path": "funding.rate_hourly",
+      "at": "2026-11-24",
+      "inputs": {
+        "scale": "1",
+        "premium_index": "0.5"
+      },
+      "rows": [],
+      "expected": "0.04",
+      "source": "https://docs.polymarket.com/perps/learn-about-trading/funding.md"
     },
     {
       "name": "Hyperliquid perp maintenance margin, 20x market",

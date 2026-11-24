@@ -1,0 +1,7 @@
+Margin
+Margin Requirements
+Initial margin is set by your configured leverage:
+IM = Notional / Leverage
+Maintenance margin uses a flat per-market rate, independent of position size, tier, and your leverage setting:
+MM = Notional × MMR        where MMR = 0.5 / MaxLeverage
+MaxLeverage is the market’s maximum leverage, so on a 20x market MMR = 2.5% for every position. MM equals half the initial margin of a position opened at max leverage; at lower leverage your IM is higher but MM stays the same, so the gap between entry requirement and liquidation grows.

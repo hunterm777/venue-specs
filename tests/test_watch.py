@@ -14,7 +14,7 @@ from watch.model import Proposal
 from watch.parsers import hyperliquid, kalshi, polymarket
 from watch.run import load_sources, run
 from watch.specio import ROOT, load_yaml
-from watch.update import apply_all
+from watch.update import Conflict, apply_all
 from watch.validate import validate_all
 from watch.version import crate_version, next_version
 
@@ -275,6 +275,98 @@ def test_replay_polymarket_tick_changes_nov_19(repo: Path) -> None:
     assert "  Spec: specs/polymarket/perp.yaml → price_grid" in log
 
 
+def _pm_page(name: str, flatten: bool) -> str:
+    text = (FIX / f"polymarket_perps_{name}.txt").read_text()
+    return " ".join(text.split()) if flatten else text
+
+
+@pytest.mark.parametrize("flatten", [False, True])
+def test_polymarket_fees_parser_matches_the_rates_in_force(flatten: bool) -> None:
+    """The fees page shows the rates in force until Nov 25, 2026: the spec as of Nov 24."""
+    res = polymarket.perps_fees(_pm_page("fees", flatten), SOURCES["polymarket_perps_fees"])
+    assert res.problems == [] and len(res.proposals) == 21
+    spec = load_yaml(ROOT / "specs/polymarket/perp.yaml")
+    hist = {e["path"]: e["leaf"]["value"] for e in load_yaml(ROOT / "history/polymarket/perp.yaml")["entries"]}
+    for p in res.proposals:
+        leaf = _get(spec, p.path)
+        in_force = hist[p.path] if leaf.get("effective_from") else leaf["value"]
+        assert in_force == p.value, p.path
+
+
+@pytest.mark.parametrize("flatten", [False, True])
+def test_polymarket_funding_parser_matches_spec(flatten: bool) -> None:
+    res = polymarket.perps_funding(_pm_page("funding", flatten), SOURCES["polymarket_perps_funding"])
+    assert res.problems == []
+    spec = load_yaml(ROOT / "specs/polymarket/perp.yaml")
+    got = {p.path: p.value for p in res.proposals}
+    assert got == {
+        "funding.sample_interval_seconds": Decimal(5),
+        "funding.impact_notional": Decimal(1000),
+        "funding.interval_hours": Decimal(1),
+        "funding.cap_per_hour": Decimal("0.04"),
+        "funding.interest_rate_8h": Decimal("0.0001"),
+        "funding.premium_clamp": Decimal("0.0005"),
+        "asset_classes.crypto.funding_scale": Decimal("1.0"),
+        "asset_classes.other.funding_scale": Decimal("0.5"),
+    }
+    for path, value in got.items():
+        assert _get(spec, path)["value"] == value, path
+
+
+@pytest.mark.parametrize("flatten", [False, True])
+def test_polymarket_margin_parser_matches_spec(flatten: bool) -> None:
+    res = polymarket.perps_margin(_pm_page("margin", flatten), SOURCES["polymarket_perps_margin"])
+    assert res.problems == []
+    spec = load_yaml(ROOT / "specs/polymarket/perp.yaml")
+    assert [(p.path, p.formula) for p in res.proposals] == [
+        ("margin.maintenance_margin_rate", spec["margin"]["maintenance_margin_rate"]["formula"])
+    ]
+
+
+def test_polymarket_page_parsers_report_what_they_cannot_read() -> None:
+    fees = polymarket.perps_fees(_pm_page("fees", True).replace("$1B", "1B"), SOURCES["polymarket_perps_fees"])
+    assert fees.proposals == [] and fees.problems == ["perps fee tier table: expected 7 rows, found 6"]
+    funding = polymarket.perps_funding("Funding is charged hourly.", SOURCES["polymarket_perps_funding"])
+    assert funding.proposals == [] and len(funding.problems) == 6
+    margin = polymarket.perps_margin("MMR depends on the market.", SOURCES["polymarket_perps_margin"])
+    assert margin.proposals == [] and len(margin.problems) == 2
+
+
+def test_reading_the_polymarket_pages_on_nov_24_changes_no_value(repo: Path) -> None:
+    """Today's rates on the fees page match the history in force until Nov 25, so the upcoming
+    rates on file are kept, and the funding and margin pages match the spec."""
+    specs_before = (repo / "specs/polymarket/perp.yaml").read_text()
+    hist_before = (repo / "history/polymarket/perp.yaml").read_text()
+    props = []
+    for name in ("fees", "funding", "margin"):
+        props += getattr(polymarket, f"perps_{name}")(
+            _pm_page(name, False), SOURCES[f"polymarket_perps_{name}"]
+        ).proposals
+    conflicts: list[Conflict] = []
+    changes, _ = apply_all(props, "2026-11-24", repo, conflicts)
+    assert changes == [] and conflicts == []
+    assert (repo / "specs/polymarket/perp.yaml").read_text() == specs_before
+    assert (repo / "history/polymarket/perp.yaml").read_text() == hist_before
+
+
+def test_a_fee_page_that_disagrees_with_the_rate_in_force_opens_an_issue(repo: Path) -> None:
+    """The page reads 0.0450% for tier 0 today, but the history says 0.0400% until Nov 25 and the
+    notice says 0.0500% from then: nothing is written and an issue is opened."""
+    specs_before = (repo / "specs/polymarket/perp.yaml").read_text()
+    page = _pm_page("fees", False).replace("$0\t0.0400%", "$0\t0.0450%")
+    assert page != _pm_page("fees", False)
+    snaps, offline = repo / "snaps", repo / "offline"
+    snaps.mkdir()
+    offline.mkdir()
+    (snaps / "polymarket_perps_fees.txt").write_text(_pm_page("fees", False))
+    (offline / "polymarket_perps_fees.txt").write_text(page)
+    out = run("2026-11-24", offline=offline, snapshots=snaps, root=repo, sources=[SOURCES["polymarket_perps_fees"]])
+    assert not out["spec_changed"] and out["version"] is None and len(out["issues"]) == 1
+    body = out["issues"][0]["body"]
+    assert "fees.tiers.0.taker: the page reads 0.00045 for today" in body and "0.0005 is announced" in body
+    assert (repo / "specs/polymarket/perp.yaml").read_text() == specs_before
+
+
 def _pre_notice_spec(repo: Path) -> None:
     """Put the rates in force before Polymarket's Nov 2026 notice back in the spec, as it stood
     before the notice was published, and empty its history."""
@@ -323,7 +415,7 @@ def test_replay_polymarket_fee_notice_nov_20(repo: Path) -> None:
     )
     changes, _ = apply_all(props, "2026-11-20", repo)
 
-    assert {c.kind for c in changes} == {"Upcoming"} and len(changes) == 7
+    assert {c.kind for c in changes} == {"Upcoming"} and len(changes) == 8
     got = load_yaml(repo / "history/polymarket/perp.yaml")["entries"]
     want = load_yaml(ROOT / "history/polymarket/perp.yaml")["entries"]
     assert sorted((e["path"], e["valid_to"], e["leaf"]["value"]) for e in got) == sorted(
