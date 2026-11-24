@@ -1470,12 +1470,70 @@
     "tick": {
      "unverified": "Tick size rules are in Polymarket's perps docs and instruments endpoint, not readable here.",
      "as_of": "2026-11-24"
+    },
+    "markets": {
+     "ANT": {
+      "tick": {
+       "value": 0.001,
+       "source": "https://docs.polymarket.com/changelog/perps",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-19T11:00:00Z",
+       "note": "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."
+      }
+     },
+     "INTC": {
+      "tick": {
+       "value": 0.001,
+       "source": "https://docs.polymarket.com/changelog/perps",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-19T11:00:00Z",
+       "note": "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."
+      }
+     },
+     "SNDK": {
+      "tick": {
+       "value": 0.001,
+       "source": "https://docs.polymarket.com/changelog/perps",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-20T13:00:00Z",
+       "note": "Set by the stock split in the Nov 19, 2026 entry; trading resumed 2026-11-20T13:00:00Z."
+      }
+     }
     }
    },
    "size": {
     "minimum": {
      "unverified": "Quantity decimals and minimum notional are in Polymarket's perps docs, not readable here.",
      "as_of": "2026-11-24"
+    },
+    "markets": {
+     "ANT": {
+      "step": {
+       "value": 0.001,
+       "source": "https://docs.polymarket.com/changelog/perps",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-19T11:00:00Z",
+       "note": "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."
+      }
+     },
+     "INTC": {
+      "step": {
+       "value": 0.001,
+       "source": "https://docs.polymarket.com/changelog/perps",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-19T11:00:00Z",
+       "note": "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."
+      }
+     },
+     "SNDK": {
+      "step": {
+       "value": 0.001,
+       "source": "https://docs.polymarket.com/changelog/perps",
+       "as_of": "2026-11-24",
+       "effective_from": "2026-11-20T13:00:00Z",
+       "note": "Set by the stock split in the Nov 19, 2026 entry; trading resumed 2026-11-20T13:00:00Z."
+      }
+     }
     }
    },
    "margin": {

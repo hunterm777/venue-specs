@@ -13,11 +13,11 @@ The YAML files in `specs/` are the source of truth. A JSON bundle, a Rust crate 
 | `hyperliquid/perp` | 67 | 0 | Hyperliquid docs: fees, funding, margining, margin tiers, liquidations, contract specs, tick and lot size, HIP-3 |
 | `hyperliquid/outcome` (HIP-4) | 16 | 2 | Hyperliquid docs: HIP-4, fees |
 | `polymarket/binary` | 27 | 6 | Polymarket trading fees page |
-| `polymarket/perp` | 26 | 8 | Polymarket Perps fee change notice (Nov 2026) |
+| `polymarket/perp` | 32 | 8 | Polymarket Perps fee change notice (Nov 2026), Perps changelog |
 | `kalshi/binary` | 15 | 7 | Kalshi API docs: fee rounding, fixed-point, changelog |
 | `kalshi/perp` | 3 | 12 | Kalshi API changelog |
 
-Kalshi's fee schedule and help center, and Polymarket's pages other than the two above, could not be read when these files were written, so the values that live there (for example Kalshi's fee coefficients and Polymarket Perps margin) are `unverified`. Asking for one is an error that says why, never a silent zero. The daily watcher tracks those pages and opens an issue when they change.
+Kalshi's fee schedule and help center, and Polymarket's pages other than those above, could not be read when these files were written, so the values that live there (for example Kalshi's fee coefficients and Polymarket Perps margin) are `unverified`. Asking for one is an error that says why, never a silent zero. The weekly watcher tracks those pages and opens an issue when they change.
 
 ## Install
 
@@ -74,17 +74,17 @@ model_fee: { unverified: "On the Kalshi fee schedule, which was not readable her
 
 Formulas are strings in a small grammar ([`schema/formula-grammar.md`](schema/formula-grammar.md)) evaluated by the Rust crate, so a fee formula change is a data change. `history/` keeps every replaced value with the instant it stopped applying (`valid_to`).
 
-## The daily watcher
+## The weekly watcher
 
-[`.github/workflows/watch.yml`](.github/workflows/watch.yml) runs once a day:
+[`.github/workflows/watch.yml`](.github/workflows/watch.yml) runs once a week, on Mondays at 06:17 UTC:
 
 1. Fetch every source in [`watch/sources.yaml`](watch/sources.yaml): changelogs, fee and rules pages (as `.md` where the venue offers it), the Kalshi fee schedule PDF and Hyperliquid's info endpoint.
 2. Diff each against its snapshot in `watch/snapshots/`. Nothing changed: stop.
-3. Parse changed sources with the venue's parser in `watch/parsers/`. Hyperliquid's fee tables and funding constants, and Kalshi's contract size step, are parsed deterministically.
+3. Parse changed sources with the venue's parser in `watch/parsers/`. Hyperliquid's fee tables and funding constants, Kalshi's contract size step, and the per-market tick and size step changes in Polymarket's Perps changelog are parsed deterministically.
 4. Validate the specs and run every test, the fee fixtures included.
 5. Commit the updated YAML, history, snapshots and a dated [`CHANGELOG.md`](CHANGELOG.md) entry to `main`, tag a calendar version and release it.
 
-A page that changed with no value parsed (a prose announcement, or a page with no parser yet) is committed as a Docs-only entry and opens an issue quoting the diff; values are never extracted from prose. When validation or a test fails, nothing is committed and an issue is opened with the log. Announced changes are stored with their `effective_from` date and logged as Upcoming.
+A page that changed with no value parsed (a prose announcement, or a page with no parser yet) is committed as a Docs-only entry and opens an issue quoting the diff. Parsers read only tables and the fixed sentences they know; anything else is left to the issue. When validation or a test fails, nothing is committed and an issue is opened with the log. Announced changes are stored with their `effective_from` date and logged as Upcoming.
 
 Run it locally with `python -m watch.run --out watch-out`, or `--offline DIR` to read fetched copies from `DIR/<id>.txt`.
 

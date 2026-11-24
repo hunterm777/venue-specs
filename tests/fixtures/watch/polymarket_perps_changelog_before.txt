@@ -1,0 +1,8 @@
+Perps Changelog
+Recent changes to the Polymarket Perps API and platform
+Nov 13, 2026
+Price precision, public leverage, and capabilities
+Clarified
+Stock splits. ANT-USD can now go through a stock split to move to per-share units. Nothing happens on deploy; the pause and conversion will be announced separately. After it reopens, refresh its prices and sizes and recreate quotes canceled with stock_split.
+Nov 10, 2026
+Reduce-only closes, tiered maintenance, and cancel-on-disconnect

@@ -1,4 +1,4 @@
-# Every page and endpoint the daily watcher fetches. Public pages only.
+# Every page and endpoint the weekly watcher fetches. Public pages only.
 #
 # kind:   markdown | html | rss | json_post | pdf
 # parser: <venue>.<function> in watch/parsers/, or omitted for prose-only pages. A change to a
@@ -53,6 +53,7 @@ sources:
     products: [perp]
     url: https://docs.polymarket.com/changelog/perps
     kind: html
+    parser: polymarket.perps_changelog
   - id: polymarket_trading_fees
     title: "Polymarket: Trading fees"
     venue: polymarket

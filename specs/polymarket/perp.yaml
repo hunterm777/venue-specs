@@ -1,8 +1,9 @@
 # Polymarket Perps.
 # Fees read Nov 24, 2026 from Polymarket's November 2026 fee change notice, which schedules
 # new rates for November 25, 2026; the rates in force before then are in history/.
+# Per-market tick and size steps for ANT, INTC and SNDK are read from the Perps changelog.
 # Polymarket's other perps docs were not readable from here, so those entries are unverified.
-# The daily watcher tracks those pages and opens an issue when they change.
+# The weekly watcher tracks those pages and opens an issue when they change.
 schema_version: 1
 venue: polymarket
 product: perp
@@ -73,11 +74,25 @@ price_grid:
   tick:
     unverified: "Tick size rules are in Polymarket's perps docs and instruments endpoint, not readable here."
     as_of: 2026-11-24
+  markets:
+    ANT:
+      tick: {value: 0.001, source: "https://docs.polymarket.com/changelog/perps", as_of: 2026-11-24, effective_from: "2026-11-19T11:00:00Z", note: "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."}
+    INTC:
+      tick: {value: 0.001, source: "https://docs.polymarket.com/changelog/perps", as_of: 2026-11-24, effective_from: "2026-11-19T11:00:00Z", note: "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."}
+    SNDK:
+      tick: {value: 0.001, source: "https://docs.polymarket.com/changelog/perps", as_of: 2026-11-24, effective_from: "2026-11-20T13:00:00Z", note: "Set by the stock split in the Nov 19, 2026 entry; trading resumed 2026-11-20T13:00:00Z."}
 
 size:
   minimum:
     unverified: "Quantity decimals and minimum notional are in Polymarket's perps docs, not readable here."
     as_of: 2026-11-24
+  markets:
+    ANT:
+      step: {value: 0.001, source: "https://docs.polymarket.com/changelog/perps", as_of: 2026-11-24, effective_from: "2026-11-19T11:00:00Z", note: "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."}
+    INTC:
+      step: {value: 0.001, source: "https://docs.polymarket.com/changelog/perps", as_of: 2026-11-24, effective_from: "2026-11-19T11:00:00Z", note: "Set in the Nov 19, 2026 maintenance window, which started 2026-11-19T11:00:00Z."}
+    SNDK:
+      step: {value: 0.001, source: "https://docs.polymarket.com/changelog/perps", as_of: 2026-11-24, effective_from: "2026-11-20T13:00:00Z", note: "Set by the stock split in the Nov 19, 2026 entry; trading resumed 2026-11-20T13:00:00Z."}
 
 margin:
   max_leverage:

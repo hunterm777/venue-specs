@@ -1,4 +1,4 @@
-"""The daily watcher: fetch every source, diff against snapshots, parse, update specs, log.
+"""The weekly watcher: fetch every source, diff against snapshots, parse, update specs, log.
 
     python -m watch.run                    # fetch live, update the repo in place
     python -m watch.run --offline DIR      # read fetched copies from DIR/<id>.txt instead

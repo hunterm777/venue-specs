@@ -12,7 +12,7 @@ VENUE_NAMES = {"kalshi": "Kalshi", "polymarket": "Polymarket", "hyperliquid": "H
 ORDER = {"Changed": 0, "Added": 1, "Removed": 2, "Upcoming": 3, "Docs-only": 4}
 INTRO = (
     "# Changelog\n\n"
-    "Written by the daily watcher (`watch/run.py`). Entries are dated by the day a change was detected\n"
+    "Written by the weekly watcher (`watch/run.py`). Entries are dated by the day a change was detected\n"
     "and say when it takes effect at the venue. Entry types: Changed, Added, Removed, Upcoming\n"
     "(announced, not yet in force) and Docs-only (a watched page changed, no spec value affected).\n"
 )

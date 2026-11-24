@@ -1,6 +1,6 @@
 # Kalshi event contracts (binaries).
 # Values read Nov 24, 2026. Kalshi's fee schedule (kalshi.com/fee-schedule) and help center
-# were not readable from here, so entries that depend on them are marked unverified. The daily
+# were not readable from here, so entries that depend on them are marked unverified. The weekly
 # watcher tracks those pages and opens an issue when they change.
 schema_version: 1
 venue: kalshi

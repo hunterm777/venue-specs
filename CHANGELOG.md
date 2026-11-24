@@ -1,6 +1,6 @@
 # Changelog
 
-Written by the daily watcher (`watch/run.py`). Entries are dated by the day a change was detected
+Written by the weekly watcher (`watch/run.py`). Entries are dated by the day a change was detected
 and say when it takes effect at the venue. Entry types: Changed, Added, Removed, Upcoming
 (announced, not yet in force) and Docs-only (a watched page changed, no spec value affected).
 
@@ -38,3 +38,6 @@ and say when it takes effect at the venue. Entry types: Changed, Added, Removed,
 - Upcoming: fee tiers 0, 1, 2, 5 and 6 and the liquidation fee (0.5% -> 1%) change (takes effect 2026-11-25)
   Source: https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md
   Spec: specs/polymarket/perp.yaml → fees
+- Added: tick and size step of 0.001 for ANT and INTC (in force from 2026-11-19 11:00 UTC) and SNDK (from 2026-11-20 13:00 UTC)
+  Source: https://docs.polymarket.com/changelog/perps
+  Spec: specs/polymarket/perp.yaml → price_grid, size

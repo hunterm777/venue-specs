@@ -1,14 +1,14 @@
 name: watch
 
-# Daily: fetch every source in watch/sources.yaml, diff against watch/snapshots/, parse, update
-# the specs, and commit straight to main when the specs validate and every test passes. A spec
+# Weekly, Mondays at 06:17 UTC: fetch every source in watch/sources.yaml, diff against
+# watch/snapshots/, parse, update the specs, and commit straight to main when the specs validate and every test passes. A spec
 # change is tagged with a calendar version and released. A page change with no parsed value is
 # committed as a Docs-only entry and opens an issue quoting the diff. When a check fails,
 # nothing is committed and an issue is opened with the log.
 
 on:
   schedule:
-    - cron: "17 6 * * *"
+    - cron: "17 6 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -91,7 +91,7 @@ jobs:
           python - <<'PY'
           import json, pathlib
           log = pathlib.Path("watch-out/check.log").read_text(errors="replace").splitlines()[-150:]
-          body = ("The daily watcher found changes but the specs did not validate or a test failed, "
+          body = ("The weekly watcher found changes but the specs did not validate or a test failed, "
                   "so nothing was committed.\n\n```\n" + "\n".join(log) + "\n```")
           pathlib.Path("watch-out/failure.json").write_text(json.dumps([{"title": "Watcher checks failed", "body": body}]))
           json.dump({"issues": []}, open("watch-out/empty.json", "w"))

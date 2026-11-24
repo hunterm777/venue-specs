@@ -1,6 +1,6 @@
 name: release
 
-# Runs only for a version tag (vYYYY.MM.DD or vYYYY.MM.DD.N): pushed by hand, or by the daily
+# Runs only for a version tag (vYYYY.MM.DD or vYYYY.MM.DD.N): pushed by hand, or by the weekly
 # watcher through workflow_call (tags pushed by the workflow token do not trigger workflows).
 # The watcher runs every check before it tags; push a tag by hand only on a commit CI passed.
 # Always: a GitHub release with venue-specs.json, the wheels and the crate archive attached.

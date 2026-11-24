@@ -1,6 +1,6 @@
 # Polymarket prediction markets (binaries).
 # Fees read Nov 24, 2026 from the trading fees page. Polymarket's other docs pages were not
-# readable from here, so those entries are unverified. The daily watcher tracks those pages and
+# readable from here, so those entries are unverified. The weekly watcher tracks those pages and
 # opens an issue when they change.
 schema_version: 1
 venue: polymarket

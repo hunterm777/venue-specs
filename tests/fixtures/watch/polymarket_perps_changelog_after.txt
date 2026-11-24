@@ -1,0 +1,18 @@
+Perps Changelog
+Recent changes to the Polymarket Perps API and platform
+Nov 19, 2026
+Stale-price portfolio values, isolated withdrawals, and ANT, INTC, and SNDK tick changes
+No endpoints or required request fields are removed. Check portfolio values during price outages and size parsing before the deploy. ANT, INTC, and SNDK change tick size, and SNDK splits 8-for-1.
+Market Maintenance
+ANT and INTC tick size. During the maintenance window, both markets move to 3 quantity decimals and 3 price decimals: a 0.001 size step and a 0.001 price tick.
+Each market pauses, and all of its orders, TP/SL orders, and algos are canceled.
+Positions are rounded toward zero to the new 0.001 size step. Any remainder below 0.001 is closed to the insurance fund, so reconcile your positions before quoting again.
+SNDK 8-for-1 split. Trading pauses Thursday, November 19 at 7:55 PM ET (00:55 UTC Friday) and resumes Friday, November 20 at 8:00 AM ET (13:00 UTC), with the same post-only reopening. Prices and sizes convert 8-for-1, and SNDK moves to the 0.001 tick and size step at the same time. share_unit_version increments for SNDK, as in earlier splits.
+Rollout
+Maintenance starts Thursday, November 19 at 6:00 AM ET (11:00 UTC) and is expected to take 30–45 minutes. The exchange is cancel-only during the upgrade: cancels keep working, new orders are rejected, and resting orders stay on the book. ANT and INTC change tick size in the same window.
+Nov 13, 2026
+Price precision, public leverage, and capabilities
+Clarified
+Stock splits. ANT-USD can now go through a stock split to move to per-share units. Nothing happens on deploy; the pause and conversion will be announced separately. After it reopens, refresh its prices and sizes and recreate quotes canceled with stock_split.
+Nov 10, 2026
+Reduce-only closes, tiered maintenance, and cancel-on-disconnect

@@ -11,7 +11,7 @@ import pytest
 
 from watch import changelog
 from watch.model import Proposal
-from watch.parsers import hyperliquid, kalshi
+from watch.parsers import hyperliquid, kalshi, polymarket
 from watch.run import load_sources, run
 from watch.specio import ROOT, load_yaml
 from watch.update import apply_all
@@ -190,13 +190,89 @@ def test_replay_kalshi_maker_fees_aug_2026(repo: Path) -> None:
     assert (snaps / "kalshi_changelog.txt").read_text() == (FIX / "kalshi_changelog_after.xml").read_text()
 
 
-@pytest.mark.skip(
-    reason="M3 replay 2 cannot run: no Polymarket changelog entry for the Nov 19, 2026 ANT, INTC and SNDK tick "
-    "changes was found in the docs read on 2026-11-24, and the page could not be re-read, so there is no "
-    "real before/after to replay."
-)
-def test_replay_polymarket_tick_changes_nov_19() -> None:
-    raise AssertionError
+PM_TICKS = {
+    "ANT": "2026-11-19T11:00:00Z",
+    "INTC": "2026-11-19T11:00:00Z",
+    "SNDK": "2026-11-20T13:00:00Z",
+}
+
+
+@pytest.mark.parametrize("flatten", [False, True])
+def test_polymarket_changelog_parser_matches_spec(flatten: bool) -> None:
+    text = (FIX / "polymarket_perps_changelog_after.txt").read_text()
+    if flatten:
+        text = " ".join(text.split())
+    res = polymarket.perps_changelog(text, SOURCES["polymarket_perps_changelog"])
+    assert res.problems == []
+    got = {(p.path, p.value, p.effective_from) for p in res.proposals}
+    want = set()
+    for market, starts in PM_TICKS.items():
+        want |= {
+            (f"price_grid.markets.{market}.tick", Decimal("0.001"), starts),
+            (f"size.markets.{market}.step", Decimal("0.001"), starts),
+        }
+    assert got == want
+    spec = load_yaml(ROOT / "specs/polymarket/perp.yaml")
+    for p in res.proposals:
+        leaf = _get(spec, p.path)
+        assert (leaf["value"], leaf["effective_from"]) == (p.value, p.effective_from), p.path
+
+
+def test_polymarket_changelog_parser_keeps_the_newest_entry_per_market() -> None:
+    text = (
+        "Dec 3, 2026 Later change Market Maintenance ANT tick size. During the maintenance window, the market "
+        "moves to 2 quantity decimals and 2 price decimals: a 0.01 size step and a 0.01 price tick. Rollout "
+        "Maintenance starts Thursday, December 3 at 6:00 AM ET (11:00 UTC). "
+        + (FIX / "polymarket_perps_changelog_after.txt").read_text()
+    )
+    res = polymarket.perps_changelog(text, SOURCES["polymarket_perps_changelog"])
+    ant = {p.path: (p.value, p.effective_from) for p in res.proposals if ".ANT." in p.path}
+    assert ant == {
+        "price_grid.markets.ANT.tick": (Decimal("0.01"), "2026-12-03T11:00:00Z"),
+        "size.markets.ANT.step": (Decimal("0.01"), "2026-12-03T11:00:00Z"),
+    }
+
+
+def test_polymarket_changelog_parser_reports_a_tick_change_it_cannot_read() -> None:
+    text = "Dec 3, 2026 ANT tick size changes to one tenth of a cent next week."
+    res = polymarket.perps_changelog(text, SOURCES["polymarket_perps_changelog"])
+    assert res.proposals == [] and res.problems and "Dec 3, 2026" in res.problems[0]
+    assert polymarket.perps_changelog("no entries", SOURCES["polymarket_perps_changelog"]).problems
+
+
+def test_replay_polymarket_tick_changes_nov_19(repo: Path) -> None:
+    """M3 replay 2: the Perps changelog before and after its Nov 19, 2026 entry (excerpts of the
+    page as pasted on 2026-11-24). ANT, INTC and SNDK gain their tick and size step; the docs give
+    no earlier per-market values, so these are Added, with no history."""
+    from watch.update import SpecFiles
+
+    files = SpecFiles("polymarket", "perp", repo)
+    for section in ("price_grid", "size"):
+        del files.doc[section]["markets"]
+    files.dirty = True
+    files.save()
+    snaps, offline = repo / "snaps", repo / "offline"
+    snaps.mkdir()
+    offline.mkdir()
+    shutil.copy(FIX / "polymarket_perps_changelog_before.txt", snaps / "polymarket_perps_changelog.txt")
+    shutil.copy(FIX / "polymarket_perps_changelog_after.txt", offline / "polymarket_perps_changelog.txt")
+    hist_before = (repo / "history/polymarket/perp.yaml").read_text()
+
+    out = run("2026-11-24", offline=offline, snapshots=snaps, root=repo, sources=list(SOURCES.values()))
+    assert out["spec_changed"] and out["issues"] == [] and out["version"] == "2026.11.24.1"
+    assert {c["kind"] for c in out["changes"]} == {"Added"} and len(out["changes"]) == 6
+    assert ("price_grid.markets.SNDK.tick = 0.001", "2026-11-20T13:00:00Z") in {
+        (c["summary"], c["effective_from"]) for c in out["changes"]
+    }
+    spec = load_yaml(repo / "specs/polymarket/perp.yaml")
+    current = load_yaml(ROOT / "specs/polymarket/perp.yaml")
+    for section in ("price_grid", "size"):
+        assert spec[section]["markets"] == current[section]["markets"]
+    assert (repo / "history/polymarket/perp.yaml").read_text() == hist_before
+    assert validate_all(repo) == []
+    log = (repo / "CHANGELOG.md").read_text()
+    assert "### Polymarket — perp\n- Added: price_grid.markets.ANT.tick = 0.001" in log
+    assert "  Spec: specs/polymarket/perp.yaml → price_grid" in log
 
 
 def _pre_notice_spec(repo: Path) -> None:
@@ -221,8 +297,8 @@ def _pre_notice_spec(repo: Path) -> None:
 
 
 def test_replay_polymarket_fee_notice_nov_20(repo: Path) -> None:
-    """M3 replay 3, value path only: Polymarket has no parser yet (its page layout could not be
-    read), so this applies the notice's values, as read on 2026-11-24, to the spec as it stood
+    """M3 replay 3, value path only: the notice page has no parser (its layout has not been
+    checked), so this applies the notice's values, as read on 2026-11-24, to the spec as it stood
     before the notice and checks the result is Upcoming entries plus the history now on file."""
     _pre_notice_spec(repo)
     url = "https://docs.polymarket.com/perps/fee-and-liquidity-reward-changes-november-2026.md"

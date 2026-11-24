@@ -1,6 +1,6 @@
 # Kalshi perpetual futures (margin markets).
 # Kalshi's help center, fee schedule and perps contract terms were not readable from here,
-# so most entries are unverified. The daily watcher tracks those pages and opens an issue when
+# so most entries are unverified. The weekly watcher tracks those pages and opens an issue when
 # they change.
 schema_version: 1
 venue: kalshi
